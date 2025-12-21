@@ -306,9 +306,13 @@ public class EditorPad : MonoBehaviour
             sizeX.text = asset.size.x.ToString();
             sizeZ.text = asset.size.z.ToString();
             UpdateSize();
+            while (ec.rooms.Count != 0)
+            {
+                ec.DestroyRoom(ec.rooms[0]);
+            }
             foreach (var item in asset.rooms)
             {
-                ec.CreateRoom(item.color);
+                room = ec.CreateRoom(item.color);
                 foreach (var item0 in item.cells)
                 {
                     ec.CreateCell(item0.position, room, item0.id);

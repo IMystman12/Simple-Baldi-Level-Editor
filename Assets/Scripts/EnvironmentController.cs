@@ -46,7 +46,7 @@ public class EnvironmentController : MonoBehaviour
                 cells[position.x, position.z] = cellInstance;
                 cellInstance.data.position = position;
                 cellInstance.room = room;
-                room.cells.Add(cellInstance.data);
+                cellInstance.room.cells.Add(cellInstance.data);
                 cellInstance.ChangeColor();
                 cellInstance.data.id = id;
                 cellInstance.rendererBase.sprite = cellSprites[id];
@@ -55,9 +55,10 @@ public class EnvironmentController : MonoBehaviour
             else
             {
                 cellInstance = CellFromPosition(position);
-                room.cells.Remove(cellInstance.data);
+                cellInstance.room.cells.Remove(cellInstance.data);
                 cellInstance.room = room;
-                room.cells.Add(cellInstance.data);
+                cellInstance.room.cells.Add(cellInstance.data);
+                cellInstance.ChangeColor();
                 cellInstance.data.id = id;
                 cellInstance.rendererBase.sprite = cellSprites[id];
                 return cellInstance;
