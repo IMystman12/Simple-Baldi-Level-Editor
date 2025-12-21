@@ -1,0 +1,499 @@
+fileFormatVersion: 2
+guid: 418821f5517b946499bdae5decee91b8
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5938331277738059332
+    second: MapMarker_Sheet_LowPPU_0
+  - first:
+      213: -3273004137996641929
+    second: MapMarker_Sheet_LowPPU_1
+  - first:
+      213: -4079561811340555316
+    second: MapMarker_Sheet_LowPPU_2
+  - first:
+      213: -7448968014542926032
+    second: MapMarker_Sheet_LowPPU_3
+  - first:
+      213: -123856862286980457
+    second: MapMarker_Sheet_LowPPU_4
+  - first:
+      213: -193532288724676332
+    second: MapMarker_Sheet_LowPPU_5
+  - first:
+      213: -6823428493616070655
+    second: MapMarker_Sheet_LowPPU_6
+  - first:
+      213: -5107072452504436483
+    second: MapMarker_Sheet_LowPPU_7
+  - first:
+      213: 6965176959655965335
+    second: MapMarker_Sheet_LowPPU_8
+  - first:
+      213: -7304307397969776605
+    second: MapMarker_Sheet_LowPPU_9
+  - first:
+      213: -2210697993825381979
+    second: MapMarker_Sheet_LowPPU_10
+  - first:
+      213: -6846077273218867373
+    second: MapMarker_Sheet_LowPPU_11
+  - first:
+      213: -4772175200088282174
+    second: MapMarker_Sheet_LowPPU_12
+  - first:
+      213: 8350465978449195706
+    second: MapMarker_Sheet_LowPPU_13
+  - first:
+      213: -4870802717732481263
+    second: MapMarker_Sheet_LowPPU_14
+  - first:
+      213: -5410928497329088150
+    second: MapMarker_Sheet_LowPPU_15
+  - first:
+      213: 8781354593667461520
+    second: MapMarker_Sheet_LowPPU_16
+  - first:
+      213: -6979654531007338814
+    second: MapMarker_Sheet_LowPPU_17
+  - first:
+      213: 7357161499435251321
+    second: MapMarker_Sheet_LowPPU_18
+  - first:
+      213: 5181065434971523743
+    second: MapMarker_Sheet_LowPPU_19
+  - first:
+      213: -3471889104272849833
+    second: MapMarker_Sheet_LowPPU_20
+  externalObjects: {}
+  serializedVersion: 12
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 4
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 40
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 0
+  flipbookColumns: 0
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Windows Store Apps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_0
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 385
+        width: 43
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cb9d4df5a2fc69da0800000000000000
+      internalID: -5938331277738059332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_1
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 385
+        width: 57
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 779935ed314f392d0800000000000000
+      internalID: -3273004137996641929
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_2
+      rect:
+        serializedVersion: 2
+        x: 139
+        y: 385
+        width: 42
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ccb0cc3a52c7267c0800000000000000
+      internalID: -4079561811340555316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_3
+      rect:
+        serializedVersion: 2
+        x: 199
+        y: 385
+        width: 50
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 03f0ced9e03ff9890800000000000000
+      internalID: -7448968014542926032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_4
+      rect:
+        serializedVersion: 2
+        x: 11
+        y: 257
+        width: 42
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 79ad36807d8f74ef0800000000000000
+      internalID: -123856862286980457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_5
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 257
+        width: 45
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4115ff5a86f605df0800000000000000
+      internalID: -193532288724676332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_6
+      rect:
+        serializedVersion: 2
+        x: 138
+        y: 321
+        width: 37
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1004cb7efef4e41a0800000000000000
+      internalID: -6823428493616070655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_7
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 321
+        width: 57
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: df04a42b9a80029b0800000000000000
+      internalID: -5107072452504436483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_8
+      rect:
+        serializedVersion: 2
+        x: 13
+        y: 193
+        width: 37
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 792770eaa8749a060800000000000000
+      internalID: 6965176959655965335
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_9
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 193
+        width: 50
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 320f0c51f13e1aa90800000000000000
+      internalID: -7304307397969776605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_10
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 193
+        width: 39
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5a19e5c23e50251e0800000000000000
+      internalID: -2210697993825381979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_11
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 193
+        width: 44
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 35f1ae8fdf8ddf0a0800000000000000
+      internalID: -6846077273218867373
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 128
+        width: 46
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2cb2fc880f3d5cdb0800000000000000
+      internalID: -4772175200088282174
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_13
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 139
+        width: 63
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab2f2729090d2e370800000000000000
+      internalID: 8350465978449195706
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MapMarker_Sheet_LowPPU_14
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 130
+        width: 46
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1175c8e1cbe676cb0800000000000000
+      internalID: -4870802717732481263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 54f5d2490559455478dc7bb60af9e7b5
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+  spritePackingTag: 
+  pSDRemoveMatte: 0
+  pSDShowRemoveMatteOption: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
