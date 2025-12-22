@@ -425,8 +425,8 @@ public class EditorState_AreaSelect : EditorStateBase
         if (pad.inArea)
         {
             vector = pad.cursorPos;
-            vector.x = Mathf.Clamp(vector.x, 0, pad.ec.size.x);
-            vector.y = Mathf.Clamp(vector.y, 0, pad.ec.size.z);
+            vector.x = Mathf.Clamp(vector.x, -0.5f, pad.ec.size.x - 0.5f);
+            vector.y = Mathf.Clamp(vector.y, -0.5f, pad.ec.size.z - 0.5f);
             pad.viewPin.position = vector;
 
             if (aSideActived)

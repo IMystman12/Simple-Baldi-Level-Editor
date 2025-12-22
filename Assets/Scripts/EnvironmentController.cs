@@ -23,6 +23,7 @@ public class EnvironmentController : MonoBehaviour
         this.size = size;
         realSize = size + IntVector2.one * 5;
         CellInstance[,] overrided = new CellInstance[size.x, size.z];
+        List<CellInstance> cellsSaved = new List<CellInstance>();
         if (cells != null)
         {
             int ae = Mathf.Min(size.x, cells.GetLength(0)), be = Mathf.Min(size.z, cells.GetLength(1));
@@ -31,6 +32,17 @@ public class EnvironmentController : MonoBehaviour
                 for (int b = 0; b < be; b++)
                 {
                     overrided[a, b] = cells[a, b];
+                    cellsSaved.Add(cells[a, b]);
+                }
+            }
+            for (int a = 0; a < cells.GetLength(0); a++)
+            {
+                for (int b = 0; b < cells.GetLength(1); b++)
+                {
+                    if (!cellsSaved.Contains(cells[a, b]))
+                    {
+                        DestroyCell(cells[a, b]);
+                    }
                 }
             }
         }
