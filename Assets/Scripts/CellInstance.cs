@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class CellInstance : MonoBehaviour
 {
-    public bool autoConnect;
     public Room room;
     public Cell data;
     public SpriteRenderer rendererBase, rendererBG;

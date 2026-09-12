@@ -93,8 +93,16 @@ public struct IntVector2
 	public static IntVector2 GetGridPosition(Vector3 position)
 	{
 		IntVector2 result = default(IntVector2);
-		result.x = Mathf.FloorToInt(position.x / 10f);
-		result.z = Mathf.FloorToInt(position.z / 10f);
+		result.x = Mathf.RoundToInt(position.x);
+		result.z = Mathf.RoundToInt(position.y);
+		return result;
+	}
+
+	public static IntVector2 GetGridPosition(Vector2 position)
+	{
+		IntVector2 result = default(IntVector2);
+		result.x = Mathf.RoundToInt(position.x);
+		result.z = Mathf.RoundToInt(position.y);
 		return result;
 	}
 
@@ -158,8 +166,5 @@ public struct IntVector2
 		return intVector.Scale(Directions.CellDataRotationVector(direction));
 	}
 
-	public new string ToString()
-	{
-		return string.Format("{0},{1}", x, z);
-	}
+	public override string ToString() => string.Format("{0},{1}", x, z);
 }

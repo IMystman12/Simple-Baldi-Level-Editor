@@ -10,6 +10,7 @@ public class EnvironmentController : MonoBehaviour
     public CellInstance cellPref, cellInstance;
     public CellInstance[,] cells;
     public List<Room> rooms = new List<Room>();
+    public List<Icon> icons = new List<Icon>();
     private void Start()
     {
         Initialize(new IntVector2(32, 32));
@@ -21,7 +22,7 @@ public class EnvironmentController : MonoBehaviour
     public void ReSize(IntVector2 size)
     {
         this.size = size;
-        realSize = size + IntVector2.one * 5;
+        realSize = size - IntVector2.one;
         CellInstance[,] overrided = new CellInstance[size.x, size.z];
         List<CellInstance> cellsSaved = new List<CellInstance>();
         if (cells != null)
@@ -50,7 +51,7 @@ public class EnvironmentController : MonoBehaviour
     }
     public CellInstance CreateCell(IntVector2 position, Room room, int id = 15)
     {
-        if (ContainsRange(position))
+        if (ContainsCoordinates(position))
         {
             if (!CellFromPosition(position))
             {
@@ -105,7 +106,7 @@ public class EnvironmentController : MonoBehaviour
         foreach (var item in Directions.All)
         {
             cellInstance = GetNeighbor(cellA, item);
-            if (cellA.autoConnect && cellInstance && cellInstance.autoConnect && cellA.room == cellInstance.room)
+            if (cellInstance && cellA.room == cellInstance.room)
             {
                 ConnectCell(cellA, cellInstance, connect);
             }
@@ -140,25 +141,14 @@ public class EnvironmentController : MonoBehaviour
         {
             return;
         }
-        if (cellA.autoConnect)
-        {
-            ConnectSurround(cellA, false);
-        }
+        ConnectSurround(cellA, false);
         Destroy(cellA.gameObject);
     }
-
-    public IntVector2 GetGridPosition(Vector2 position)
-    {
-        return new IntVector2(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.y));
-    }
-    public bool ContainsRange(IntVector2 vector)
-    {
-        return vector.x >= 0 && vector.z >= 0 && vector.x < size.x && vector.z < size.z;
-    }
+    public bool ContainsCoordinates(IntVector2 vector) => vector.x >= 0 && vector.z >= 0 && vector.x < size.x && vector.z < size.z;
     public CellInstance CellFromPosition(IntVector2 vector)
     {
-        IntVector2 vectorA = GetGridPosition(vector);
-        if (ContainsRange(vector))
+        IntVector2 vectorA = IntVector2.GetGridPosition(vector);
+        if (ContainsCoordinates(vector))
         {
             return cells[vectorA.x, vectorA.z];
         }
@@ -169,7 +159,8 @@ public class EnvironmentController : MonoBehaviour
 [Serializable]
 public class Room
 {
-    public Color color;
+    public string name = "Room";
+    public Color color = Color.white;
     public List<Cell> cells = new List<Cell>();
     public void ChangeColor(EnvironmentController ec)
     {
@@ -184,4 +175,21 @@ public class Cell
 {
     public int id = 16;
     public IntVector2 position;
+}
+[Serializable]
+public class LevelAsset
+{
+    public IntVector2 size;
+    public Room[] rooms = new Room[0];
+    public Icon[] icons = new Icon[0];
+}
+[Serializable]
+public class Icon
+{
+    public Vector2 position;
+    public float rotation;
+
+    public string spriteName;
+    public bool isBillboard;
+    public Color color = Color.white;
 }
