@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using TMPro;
 using UnityEngine;
 
@@ -14,6 +13,7 @@ public class RoomEditor : MonoBehaviour
         currentTag = roomTag;
         tags.ForEach(a => a.OffHighlight());
         nameField.text = currentTag.room.name;
+        ApplyName();
         ShowColor();
         EditorPad.Instance.Pause(true);
         gameObject.SetActive(true);

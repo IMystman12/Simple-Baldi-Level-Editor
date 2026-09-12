@@ -190,6 +190,13 @@ public class Icon
     public float rotation;
 
     public string spriteName;
-    public bool isBillboard;
     public Color color = Color.white;
+}
+[Serializable]
+public class Door
+{
+    public IntVector2 position;
+    public Direction direction;
+
+    public string spriteName;
 }

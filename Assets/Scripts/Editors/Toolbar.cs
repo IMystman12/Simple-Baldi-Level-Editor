@@ -33,11 +33,13 @@ public class Toolbar : MonoBehaviour
     }
     public class Tool_Painter : Tool_StateBase
     {
+        IntVector2 pos = IntVector2.one * -1;
         public override void Update()
         {
-            if (fitForBuild && submit)
+            if (fitForBuild && submit && pos != EditorPad.Instance.cursorGridPos)
             {
-                ReceivePosition(EditorPad.Instance.cursorGridPos);
+                pos = EditorPad.Instance.cursorGridPos;
+                ReceivePosition(pos);
             }
         }
     }
@@ -59,7 +61,6 @@ public class Toolbar : MonoBehaviour
                 {
                     var posB = EditorPad.Instance.cursorGridPos;
                     List<IntVector2> positions = new List<IntVector2>();
-
                     for (int i = Mathf.Min(posA.x, posB.x), i0 = Mathf.Max(posA.x, posB.x); i <= i0; i++)
                     {
                         for (int j = Mathf.Min(posA.z, posB.z), j0 = Mathf.Max(posA.z, posB.z); j <= j0; j++)
@@ -81,20 +82,16 @@ public class Toolbar : MonoBehaviour
         if (i < tools.Length)
         {
             tools[i].interactable = !val;
-            tools[i].isOn = !val;
             return;
         }
         remove.interactable = !val;
-        remove.isOn = !val;
     }
-    public void SetActive(bool val)
+    public void ResetAll(bool val)
     {
-        gameObject.SetActive(val);
-        for (int i = 0; i < tools.Length; i++)
+        for (int i = 0; i < tools.Length + 1; i++)
         {
             Disable(i, !val);
         }
-        UpdateValue();
     }
     public void UpdateValue()
     {
@@ -102,7 +99,7 @@ public class Toolbar : MonoBehaviour
         var tool = Tool.None;
         for (int i = 0; i < tools.Length; i++)
         {
-            if (tools[i].isOn)
+            if (tools[i].isOn && tools[i].interactable)
             {
                 tool = (Tool)i;
                 break;

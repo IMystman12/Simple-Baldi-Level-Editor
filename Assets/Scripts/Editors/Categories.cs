@@ -19,19 +19,23 @@ public class Categories : MonoBehaviour
     public Toggle[] toggles = new Toggle[6];
     public Toolbar toolbar;
     void Start() => UpdateBool();
-    public void Off()
+    public void Reset()
     {
-        for (int i = 0; i < toggles.Length; i++)
+        toolbar.gameObject.SetActive(false);
+        EditorPad.Instance.editorState.ChangeState(null);
+    }
+    public void Pause(bool val)
+    {
+        gameObject.SetActive(!val);
+        Reset();
+        if (!val)
         {
-            toggles[i].isOn = false;
+            UpdateBool();
         }
-        UpdateBool();
-        gameObject.SetActive(false);
     }
     public void UpdateBool()
     {
-        toolbar.SetActive(false);
-        EditorPad.Instance.editorState.ChangeState(null);
+        Reset();
 
         Category newCate = Category.None;
         for (int i = 0; i < toggles.Length; i++)
@@ -46,22 +50,29 @@ public class Categories : MonoBehaviour
         category = newCate;
         switch (category)
         {
+            case Category.None:
+                Reset();
+                break;
             case Category.Cell:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Cell());
-                toolbar.SetActive(true);
+                toolbar.gameObject.SetActive(true);
+                toolbar.ResetAll(true);
                 break;
             case Category.Icon:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Icon());
-                toolbar.SetActive(true);
+                toolbar.gameObject.SetActive(true);
+                toolbar.ResetAll(true);
                 break;
             case Category.Door:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Door());
-                toolbar.SetActive(true);
+                toolbar.gameObject.SetActive(true);
+                toolbar.ResetAll(true);
                 toolbar.Disable(1, true);
                 break;
             case Category.Generator:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Generator());
-                toolbar.SetActive(true);
+                toolbar.gameObject.SetActive(true);
+                toolbar.ResetAll(true);
                 toolbar.Disable(0, true);
                 break;
             case Category.Save:
@@ -69,6 +80,7 @@ public class Categories : MonoBehaviour
             case Category.Multiplayer:
                 break;
         }
+        toolbar.UpdateValue();
     }
     public class Editor_Cell : StateBase
     {
@@ -93,13 +105,8 @@ public class Categories : MonoBehaviour
     }
     public class Editor_Icon : StateBase
     {
-        public static bool stop;
         public override void Enter() => EditorPad.Instance.tool.subscribe = (a) =>
             {
-                if (stop)
-                {
-                    return;
-                }
                 foreach (var b in a)
                 {
                     if (EditorPad.Instance.removal)
@@ -118,9 +125,11 @@ public class Categories : MonoBehaviour
     {
         public override void Enter() => EditorPad.Instance.tool.subscribe = (a) =>
             {
-                foreach (var b in a)
+                if (a.Length != 2)
                 {
+                    return;
                 }
+
             };
         public override void Exit() => EditorPad.Instance.tool.subscribe = null;
     }

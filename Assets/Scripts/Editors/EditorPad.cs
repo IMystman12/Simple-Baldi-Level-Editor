@@ -5,6 +5,7 @@ using UnityEngine;
 public class EditorPad : MonoBehaviour
 {
     public static EditorPad Instance { get; private set; }
+    public Sprite[] sprites;
 
     public EnvironmentController ec;
     public StateMachine editorState = new StateMachine();
@@ -21,14 +22,8 @@ public class EditorPad : MonoBehaviour
     public void Pause(bool val)
     {
         pause = val;
-        if (val)
-        {
-            categories.Off();
-        }
-        else
-        {
-            categories.gameObject.SetActive(true);
-        }
+        clkPrevious?.OffHighlight();
+        categories?.Pause(val);
     }
 
     [SerializeField] private float moveSensitivity = 10, scaleSensitivity = 10;
@@ -63,10 +58,10 @@ public class EditorPad : MonoBehaviour
     }
 
     public RoomEditor roomEditor;
-    public void OpenRoomEditor(RoomTag tag) => roomEditor.Open(tag);
 
     public IconTag iconPref;
     public List<IconTag> icons = new List<IconTag>();
+    public IconEditor iconEditor;
     public void CreateIcon(IntVector2 pos)
     {
         var ico = Instantiate(iconPref, IntVector2.ToVector2(pos), Quaternion.identity, ec.transform);
@@ -75,13 +70,38 @@ public class EditorPad : MonoBehaviour
     }
     public void DestroyIcon(IntVector2 pos)
     {
-        var list = icons.Where(a => IntVector2.GetGridPosition(a.transform.position) == pos).ToList();
-        while (list.Count > 0)
+        IconTag tag;
+        for (int i = 0; i < icons.Count;)
         {
-            DestroyIcon(list[0]);
+            tag = icons[i];
+            if (IntVector2.GetGridPosition(tag.transform.position) == pos)
+            {
+                DestroyIcon(tag);
+            }
+            else
+            {
+                i++;
+            }
         }
     }
-    public void DestroyIcon(IconTag icon)
+    void DestroyIcon(IconTag icon)
+    {
+        ec.icons.Remove(icon.icon);
+        icons.Remove(icon);
+        Destroy(icon.gameObject);
+    }
+
+
+    public DoorTag doorPref;
+    public List<DoorTag> doors = new List<DoorTag>();
+    public DoorEditor doorEditor;
+    public void CreateDoor(IntVector2 pos)
+    {
+        var ico = Instantiate(iconPref, IntVector2.ToVector2(pos), Quaternion.identity, ec.transform);
+        ec.icons.Add(ico.icon);
+        icons.Add(ico);
+    }
+    public void DestroyDoor(IconTag icon)
     {
         ec.icons.Remove(icon.icon);
         icons.Remove(icon);
@@ -93,6 +113,7 @@ public class EditorPad : MonoBehaviour
     private void Start()
     {
         roomEditor.CreateRoom();
+        sprites = sprites.Distinct().ToArray();
         tool.subscribe += (a) => Debug.Log($"Points Received: {string.Join(",,", a)}");
     }
 
