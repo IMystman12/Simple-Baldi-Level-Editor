@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class SpriteSelector : MonoBehaviour
 {
-    public Sprite result;
-    public Sprite[] sprites => EditorPad.Instance.sprites;
+    public Sprite[] sprites = new Sprite[0];
     public Toggle togglePref;
     public List<Toggle> toggles = new List<Toggle>();
+    public UnityEvent<int> checkValue;
 
     public int page, togglePerPage = 15;
     public void MovePage(int dir)
@@ -31,8 +32,41 @@ public class SpriteSelector : MonoBehaviour
         CheckValue();
     }
 
-    public void OnEnable()
+    public void CheckValue()
     {
+        int result = toggles.IndexOf(toggles.First(a => a.isOn && a.gameObject.activeSelf));
+        if (result != -1)
+        {
+            checkValue.Invoke(result);
+        }
+    }
+
+    public void Open(Categories.Category category)
+    {
+        gameObject.SetActive(true);
+        switch (category)
+        {
+            case Categories.Category.None:
+                break;
+            case Categories.Category.Cell:
+                sprites = cells;
+                break;
+            case Categories.Category.Icon:
+                sprites = icons;
+                break;
+            case Categories.Category.Door:
+                sprites = doors;
+                break;
+            case Categories.Category.Generator:
+                sprites = generators;
+                break;
+            case Categories.Category.Options:
+                break;
+            case Categories.Category.Save:
+                break;
+            case Categories.Category.Multiplayer:
+                break;
+        }
         while (toggles.Count > 0)
         {
             Destroy(toggles[0].gameObject);
@@ -48,19 +82,13 @@ public class SpriteSelector : MonoBehaviour
         page = 0;
         MovePage(0);
     }
-
-    public void CheckValue() => result = toggles.First(a => a.isOn && a.gameObject.activeSelf).image.sprite;
-
-    public GameObject source;
-    public void Open(GameObject source)
-    {
-        source.gameObject.SetActive(false);
-        gameObject.SetActive(true);
-        this.source = source;
-    }
     public void Close()
     {
         gameObject.SetActive(false);
-        source.gameObject.SetActive(true);
     }
+
+    public Sprite[] cells = new Sprite[17];
+    public Sprite[] icons = new Sprite[17];
+    public Sprite[] doors = new Sprite[17];
+    public Sprite[] generators = new Sprite[2];
 }

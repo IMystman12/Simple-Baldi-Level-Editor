@@ -5,7 +5,6 @@ using UnityEngine;
 public class EditorPad : MonoBehaviour
 {
     public static EditorPad Instance { get; private set; }
-    public Sprite[] sprites;
 
     public EnvironmentController ec;
     public StateMachine editorState = new StateMachine();
@@ -94,7 +93,6 @@ public class EditorPad : MonoBehaviour
 
     public DoorTag doorPref;
     public List<DoorTag> doors = new List<DoorTag>();
-    public DoorEditor doorEditor;
     public void CreateDoor(IntVector2 pos)
     {
         var ico = Instantiate(iconPref, IntVector2.ToVector2(pos), Quaternion.identity, ec.transform);
@@ -113,7 +111,6 @@ public class EditorPad : MonoBehaviour
     private void Start()
     {
         roomEditor.CreateRoom();
-        sprites = sprites.Distinct().ToArray();
         tool.subscribe += (a) => Debug.Log($"Points Received: {string.Join(",,", a)}");
     }
 

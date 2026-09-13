@@ -18,9 +18,11 @@ public class Categories : MonoBehaviour
     public Category category;
     public Toggle[] toggles = new Toggle[6];
     public Toolbar toolbar;
+    public SpriteSelector spriteSelector;
     void Start() => UpdateBool();
     public void Reset()
     {
+        spriteSelector.Close();
         toolbar.gameObject.SetActive(false);
         EditorPad.Instance.editorState.ChangeState(null);
     }
@@ -57,23 +59,27 @@ public class Categories : MonoBehaviour
                 EditorPad.Instance.editorState.ChangeState(new Editor_Cell());
                 toolbar.gameObject.SetActive(true);
                 toolbar.ResetAll(true);
+                spriteSelector.Open(category);
                 break;
             case Category.Icon:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Icon());
                 toolbar.gameObject.SetActive(true);
                 toolbar.ResetAll(true);
+                spriteSelector.Open(category);
                 break;
             case Category.Door:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Door());
                 toolbar.gameObject.SetActive(true);
                 toolbar.ResetAll(true);
                 toolbar.Disable(1, true);
+                spriteSelector.Open(category);
                 break;
             case Category.Generator:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Generator());
                 toolbar.gameObject.SetActive(true);
                 toolbar.ResetAll(true);
                 toolbar.Disable(0, true);
+                spriteSelector.Open(category);
                 break;
             case Category.Save:
                 break;
@@ -84,20 +90,19 @@ public class Categories : MonoBehaviour
     }
     public class Editor_Cell : StateBase
     {
+        CellInstance c;
         public override void Enter() => EditorPad.Instance.tool.subscribe = (a) =>
             {
                 foreach (var b in a)
                 {
-                    if (EditorPad.Instance.removal)
-                    {
-                        if (EditorPad.Instance.ec.CellFromPosition(b))
-                        {
-                            EditorPad.Instance.ec.DestroyCell(EditorPad.Instance.ec.CellFromPosition(b));
-                        }
-                    }
-                    else
+                    c = EditorPad.Instance.ec.CellFromPosition(b);
+                    if (!EditorPad.Instance.removal && c == null)
                     {
                         EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, EditorPad.Instance.roomEditor.currentTag.room));
+                    }
+                    else if (EditorPad.Instance.removal && c && c.room == EditorPad.Instance.roomEditor.currentTag.room)
+                    {
+                        EditorPad.Instance.ec.DestroyCell(EditorPad.Instance.ec.CellFromPosition(b));
                     }
                 }
             };

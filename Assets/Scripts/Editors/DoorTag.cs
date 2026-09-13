@@ -11,7 +11,7 @@ public class DoorTag : MonoBehaviour, IClickable
         if (spriteRenderer)
         {
             spriteRenderer.color = EditorPad.Instance.ec.CellFromPosition(door.position).room.color;
-            spriteRenderer.sprite = EditorPad.Instance.sprites.FirstOrDefault(a => a.name == door.spriteName) ?? spriteRenderer.sprite;
+            //spriteRenderer.sprite = EditorPad.Instance.sprites.FirstOrDefault(a => a.name == door.spriteName) ?? spriteRenderer.sprite;
         }
     }
 

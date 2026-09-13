@@ -19,24 +19,6 @@ public class IconEditor : MonoBehaviour
         EditorPad.Instance.Pause(false);
     }
 
-    public SpriteSelector spriteSelector;
-    public bool hasNewSprite;
-    void OnEnable()
-    {
-        if (hasNewSprite)
-        {
-            hasNewSprite = false;
-            currentTag.icon.spriteName = spriteSelector.result.name;
-            currentTag.UpdateFromData();
-        }
-    }
-    public void SetSprite()
-    {
-        spriteSelector.Open(gameObject);
-        hasNewSprite = true;
-    }
-
-
     public TMP_InputField positionField;
     public void TryApplyPosition()
     {

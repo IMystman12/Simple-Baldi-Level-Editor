@@ -52,7 +52,7 @@ public class IconTag : MonoBehaviour, IClickable
         if (spriteRenderer)
         {
             spriteRenderer.color = icon.color;
-            spriteRenderer.sprite = EditorPad.Instance.sprites.FirstOrDefault(a => a.name == icon.spriteName) ?? spriteRenderer.sprite;
+         //   spriteRenderer.sprite = EditorPad.Instance.sprites.FirstOrDefault(a => a.name == icon.spriteName) ?? spriteRenderer.sprite;
             transform.position = icon.position;
             transform.eulerAngles = Vector3.forward * icon.rotation;
         }
