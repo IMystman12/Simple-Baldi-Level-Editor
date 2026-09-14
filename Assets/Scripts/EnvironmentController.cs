@@ -1,14 +1,95 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class EnvironmentController : MonoBehaviour
 {
+    public LevelAsset ConvertToAsset
+    {
+        get
+        {
+            return null;
+        }
+    }
+
+    public void Build(LevelAsset asset)
+    {
+
+    }
+
     public IntVector2 realSize;
     public IntVector2 size;
     public Sprite[] cellSprites = new Sprite[16];
-    public CellInstance cellPref, cellInstance;
+    public CellInstance cellPref;
+
     public CellInstance[,] cells;
+
+    public DoorInstance doorPref;
+    public List<DoorInstance> doors = new List<DoorInstance>();
+    public void CreateDoor(IntVector2 position, Direction direction, Sprite sprite)
+    {
+        var cell = CellFromPosition(position);
+        if (cell)
+        {
+            if (cell.data.GetRoom(this).doors.FirstOrDefault((a) => a.position == position && a.direction == direction) != null)
+            {
+                return;
+            }
+
+            var cellB = CellFromPosition(position + direction.ToIntVector2());
+            if (!cellB)
+            {
+                return;
+            }
+
+            ConnectCell(cell, cellB);
+
+            var door = Instantiate(doorPref, (Vector2)position, direction.ToUiRotation(), transform);
+
+            var doorData = door.door;
+            doorData.spriteName = sprite.name;
+            doorData.position = position;
+            doorData.direction = direction;
+
+            door.UpdateFromData();
+
+            cell.data.GetRoom(this).doors.Add(doorData);
+            doors.Add(door);
+        }
+    }
+    public void DestroyDoor(IntVector2 position, Direction direction)
+    {
+        var cell = CellFromPosition(position);
+        if (cell)
+        {
+            var cellB = CellFromPosition(position + direction.ToIntVector2());
+            if (!cellB)
+            {
+                return;
+            }
+
+            if (cell.room != cellB.room)
+            {
+                ConnectCell(cell, cellB, false);
+            }
+
+            var room = cell.data.GetRoom(this);
+            var door = room.doors.FirstOrDefault((a) => a.position == position && a.direction == direction);
+            if (door != null)
+            {
+                var doorInst = doors.FirstOrDefault(a => a.door == door);
+                if (doorInst)
+                {
+                    doors.Remove(doorInst);
+                    Destroy(doorInst.gameObject);
+                }
+
+                room.doors.Remove(door);
+            }
+        }
+    }
+
     public List<Room> rooms = new List<Room>();
     public List<Icon> icons = new List<Icon>();
     private void Start()
@@ -23,7 +104,7 @@ public class EnvironmentController : MonoBehaviour
     {
         this.size = size;
         realSize = size - IntVector2.one;
-        CellInstance[,] overrided = new CellInstance[size.x, size.z];
+        CellInstance[,] overrode = new CellInstance[size.x, size.z];
         List<CellInstance> cellsSaved = new List<CellInstance>();
         if (cells != null)
         {
@@ -32,7 +113,7 @@ public class EnvironmentController : MonoBehaviour
             {
                 for (int b = 0; b < be; b++)
                 {
-                    overrided[a, b] = cells[a, b];
+                    overrode[a, b] = cells[a, b];
                     cellsSaved.Add(cells[a, b]);
                 }
             }
@@ -47,7 +128,7 @@ public class EnvironmentController : MonoBehaviour
                 }
             }
         }
-        cells = overrided;
+        cells = overrode;
     }
     public CellInstance CreateCell(IntVector2 position, Room room, int id = 15)
     {
@@ -55,7 +136,7 @@ public class EnvironmentController : MonoBehaviour
         {
             if (!CellFromPosition(position))
             {
-                cellInstance = Instantiate(cellPref, (Vector2)position, Quaternion.identity, transform);
+                var cellInstance = Instantiate(cellPref, (Vector2)position, Quaternion.identity, transform);
                 cells[position.x, position.z] = cellInstance;
                 cellInstance.data.position = position;
                 cellInstance.room = room;
@@ -67,7 +148,7 @@ public class EnvironmentController : MonoBehaviour
             }
             else
             {
-                cellInstance = CellFromPosition(position);
+                var cellInstance = CellFromPosition(position);
                 cellInstance.room.cells.Remove(cellInstance.data);
                 cellInstance.room = room;
                 cellInstance.room.cells.Add(cellInstance.data);
@@ -103,6 +184,7 @@ public class EnvironmentController : MonoBehaviour
         {
             return;
         }
+        CellInstance cellInstance;
         foreach (var item in Directions.All)
         {
             cellInstance = GetNeighbor(cellA, item);
@@ -162,6 +244,7 @@ public class Room
     public string name = "Room";
     public Color color = Color.white;
     public List<Cell> cells = new List<Cell>();
+    public List<Door> doors = new List<Door>();
     public void ChangeColor(EnvironmentController ec)
     {
         for (int i = 0; i < cells.Count; i++)
@@ -175,6 +258,20 @@ public class Cell
 {
     public int id = 16;
     public IntVector2 position;
+    public Room GetRoom(EnvironmentController ec)
+    {
+        foreach (var a in ec.rooms)
+        {
+            foreach (var b in a.cells)
+            {
+                if (b == this)
+                {
+                    return a;
+                }
+            }
+        }
+        return null;
+    }
 }
 [Serializable]
 public class LevelAsset

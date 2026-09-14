@@ -167,4 +167,31 @@ public struct IntVector2
 	}
 
 	public override string ToString() => string.Format("{0},{1}", x, z);
+
+	public int this[int index]
+	{
+		get
+		{
+			switch (index)
+			{
+				case 0:
+					return x;
+				case 1:
+					return z;
+			}
+			throw new IndexOutOfRangeException();
+		}
+		set
+		{
+			switch (index)
+			{
+				case 0:
+					x = value;
+					break;
+				case 1:
+					z = value;
+					break;
+			}
+		}
+	}
 }

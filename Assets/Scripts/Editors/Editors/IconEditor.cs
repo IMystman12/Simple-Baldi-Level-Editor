@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public class IconEditor : MonoBehaviour
+public class IconEditor : Singleton<IconEditor>
 {
     public IconTag currentTag;
     public void Open(IconTag icon)

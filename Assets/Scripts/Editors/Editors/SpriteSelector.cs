@@ -1,17 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
-public class SpriteSelector : MonoBehaviour
+public class SpriteSelector : Singleton<SpriteSelector>
 {
-    public Sprite[] sprites = new Sprite[0];
+    [SerializeField] private Sprite[] sprites = new Sprite[0];
+    public Sprite Selection => selectionIndex < 0 || selectionIndex >= sprites.Length ? null : sprites[selectionIndex];
     public Toggle togglePref;
     public List<Toggle> toggles = new List<Toggle>();
-    public UnityEvent<int> checkValue;
-
-    public int page, togglePerPage = 15;
+    public int page, togglePerPage = 15, selectionIndex;
     public void MovePage(int dir)
     {
         page += dir;
@@ -24,22 +22,14 @@ public class SpriteSelector : MonoBehaviour
         {
             page = 0;
         }
-        toggles.ForEach(a => a.gameObject.SetActive(false));
-        for (int i = page * togglePerPage, i0 = Mathf.Min((page + 1) * togglePerPage, toggles.Count); i < i0; i++)
+        for (int i = page * togglePerPage, j = 1, i0 = Mathf.Min((page + 1) * togglePerPage, toggles.Count); i < i0; i++, j++)
         {
-            toggles[i].gameObject.SetActive(true);
+            toggles[i].transform.SetSiblingIndex(j);
         }
         CheckValue();
     }
 
-    public void CheckValue()
-    {
-        int result = toggles.IndexOf(toggles.First(a => a.isOn && a.gameObject.activeSelf));
-        if (result != -1)
-        {
-            checkValue.Invoke(result);
-        }
-    }
+    public void CheckValue() => selectionIndex = toggles.IndexOf(toggles.FirstOrDefault(a => a.isOn));
 
     public void Open(Categories.Category category)
     {
@@ -67,16 +57,17 @@ public class SpriteSelector : MonoBehaviour
             case Categories.Category.Multiplayer:
                 break;
         }
-        while (toggles.Count > 0)
+        for (int i = 0; i < toggles.Count; i++)
         {
-            Destroy(toggles[0].gameObject);
-            toggles.RemoveAt(0);
+            Destroy(toggles[i].gameObject);
         }
+        toggles.Clear();
         Toggle t;
         for (int i = 0, i0 = sprites.Length; i < i0; i++)
         {
             t = Instantiate(togglePref, togglePref.transform.parent);
             t.image.sprite = sprites[i];
+            t.gameObject.SetActive(true);
             toggles.Add(t);
         }
         page = 0;

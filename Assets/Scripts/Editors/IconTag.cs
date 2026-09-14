@@ -5,7 +5,7 @@ public class IconTag : MonoBehaviour, IClickable
 {
     public Icon icon;
     public SpriteRenderer spriteRenderer;
-    bool available => EditorPad.Instance.tool.state == null && !EditorPad.Instance.iconEditor.isActiveAndEnabled;
+    bool available => EditorPad.Instance.tool.state == null && IconEditor.Instance && !IconEditor.Instance.isActiveAndEnabled;
     private void Awake()
     {
         icon = new Icon()
@@ -21,7 +21,7 @@ public class IconTag : MonoBehaviour, IClickable
     {
         if (available)
         {
-            EditorPad.Instance.iconEditor.Open(this);
+            IconEditor.Instance.Open(this);
         }
     }
 
@@ -52,7 +52,7 @@ public class IconTag : MonoBehaviour, IClickable
         if (spriteRenderer)
         {
             spriteRenderer.color = icon.color;
-         //   spriteRenderer.sprite = EditorPad.Instance.sprites.FirstOrDefault(a => a.name == icon.spriteName) ?? spriteRenderer.sprite;
+            spriteRenderer.sprite = SpriteSelector.Instance.icons.FirstOrDefault(a => a.name == icon.spriteName) ?? spriteRenderer.sprite;
             transform.position = icon.position;
             transform.eulerAngles = Vector3.forward * icon.rotation;
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Toolbar : MonoBehaviour
+public class Toolbar : Singleton<Toolbar>
 {
     public enum Tool
     {
@@ -30,6 +30,8 @@ public class Toolbar : MonoBehaviour
         protected bool submitDelayed => Input.GetMouseButtonDown(0);
         public Action<IntVector2[]> subscribe;
         protected void ReceivePosition(params IntVector2[] positions) => subscribe.Invoke(positions);
+        public virtual void ForceReset()
+        { }
     }
     public class Tool_Painter : Tool_StateBase
     {
@@ -42,6 +44,7 @@ public class Toolbar : MonoBehaviour
                 ReceivePosition(pos);
             }
         }
+        public override void ForceReset() => pos = IntVector2.one * -1;
     }
     public class Tool_Area : Tool_StateBase
     {
@@ -61,9 +64,9 @@ public class Toolbar : MonoBehaviour
                 {
                     var posB = EditorPad.Instance.cursorGridPos;
                     List<IntVector2> positions = new List<IntVector2>();
-                    for (int i = Mathf.Min(posA.x, posB.x), i0 = Mathf.Max(posA.x, posB.x); i <= i0; i++)
+                    for (int j = Mathf.Min(posA.z, posB.z), j0 = Mathf.Max(posA.z, posB.z); j <= j0; j++)
                     {
-                        for (int j = Mathf.Min(posA.z, posB.z), j0 = Mathf.Max(posA.z, posB.z); j <= j0; j++)
+                        for (int i = Mathf.Min(posA.x, posB.x), i0 = Mathf.Max(posA.x, posB.x); i <= i0; i++)
                         {
                             positions.Add(new IntVector2(i, j));
                         }
@@ -75,6 +78,7 @@ public class Toolbar : MonoBehaviour
             }
         }
     }
+
     public Toggle[] tools = new Toggle[2];
     public Toggle remove;
     public void Disable(int i, bool val)

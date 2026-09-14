@@ -2,10 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class EditorPad : MonoBehaviour
+public class EditorPad : Singleton<EditorPad>
 {
-    public static EditorPad Instance { get; private set; }
-
     public EnvironmentController ec;
     public StateMachine editorState = new StateMachine();
 
@@ -16,7 +14,7 @@ public class EditorPad : MonoBehaviour
     [HideInInspector] public bool inArea;
     public void SetArea(bool val) => inArea = val;
 
-    public bool pause;
+    public bool pause { get; private set; }
     public Categories categories;
     public void Pause(bool val)
     {
@@ -42,6 +40,10 @@ public class EditorPad : MonoBehaviour
     public IClickable clkCurrent, clkPrevious;
     void ClickUpdate()
     {
+        if (!inArea)
+        {
+            return;
+        }
         hit2D = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Camera.main.transform.forward, 99, availableLayers);
         clkCurrent = hit2D.transform ? hit2D.transform.GetComponent<IClickable>() : null;
         if (clkCurrent != clkPrevious)
@@ -56,14 +58,14 @@ public class EditorPad : MonoBehaviour
         }
     }
 
-    public RoomEditor roomEditor;
-
     public IconTag iconPref;
     public List<IconTag> icons = new List<IconTag>();
-    public IconEditor iconEditor;
-    public void CreateIcon(IntVector2 pos)
+    public void CreateIcon(IntVector2 pos, Sprite sprite)
     {
         var ico = Instantiate(iconPref, IntVector2.ToVector2(pos), Quaternion.identity, ec.transform);
+        ico.spriteRenderer.sprite = sprite;
+        ico.icon.spriteName = sprite.name;
+        ico.UpdateFromData();
         ec.icons.Add(ico.icon);
         icons.Add(ico);
     }
@@ -91,8 +93,8 @@ public class EditorPad : MonoBehaviour
     }
 
 
-    public DoorTag doorPref;
-    public List<DoorTag> doors = new List<DoorTag>();
+    public DoorInstance doorPref;
+    public List<DoorInstance> doors = new List<DoorInstance>();
     public void CreateDoor(IntVector2 pos)
     {
         var ico = Instantiate(iconPref, IntVector2.ToVector2(pos), Quaternion.identity, ec.transform);
@@ -106,11 +108,9 @@ public class EditorPad : MonoBehaviour
         Destroy(icon.gameObject);
     }
 
-    private void Awake() => Instance = this;
-
     private void Start()
     {
-        roomEditor.CreateRoom();
+        RoomEditor.Instance.CreateRoom();
         tool.subscribe += (a) => Debug.Log($"Points Received: {string.Join(",,", a)}");
     }
 

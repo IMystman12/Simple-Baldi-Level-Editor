@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Categories : MonoBehaviour
+public class Categories : Singleton<Categories>
 {
     public enum Category
     {
@@ -17,13 +17,11 @@ public class Categories : MonoBehaviour
     }
     public Category category;
     public Toggle[] toggles = new Toggle[6];
-    public Toolbar toolbar;
-    public SpriteSelector spriteSelector;
     void Start() => UpdateBool();
     public void Reset()
     {
-        spriteSelector.Close();
-        toolbar.gameObject.SetActive(false);
+        SpriteSelector.Instance.Close();
+        Toolbar.Instance.gameObject.SetActive(false);
         EditorPad.Instance.editorState.ChangeState(null);
     }
     public void Pause(bool val)
@@ -57,36 +55,36 @@ public class Categories : MonoBehaviour
                 break;
             case Category.Cell:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Cell());
-                toolbar.gameObject.SetActive(true);
-                toolbar.ResetAll(true);
-                spriteSelector.Open(category);
+                Toolbar.Instance.gameObject.SetActive(true);
+                Toolbar.Instance.ResetAll(true);
+                SpriteSelector.Instance.Open(category);
                 break;
             case Category.Icon:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Icon());
-                toolbar.gameObject.SetActive(true);
-                toolbar.ResetAll(true);
-                spriteSelector.Open(category);
+                Toolbar.Instance.gameObject.SetActive(true);
+                Toolbar.Instance.ResetAll(true);
+                SpriteSelector.Instance.Open(category);
                 break;
             case Category.Door:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Door());
-                toolbar.gameObject.SetActive(true);
-                toolbar.ResetAll(true);
-                toolbar.Disable(1, true);
-                spriteSelector.Open(category);
+                Toolbar.Instance.gameObject.SetActive(true);
+                Toolbar.Instance.ResetAll(true);
+                Toolbar.Instance.Disable(1, true);
+                SpriteSelector.Instance.Open(category);
                 break;
             case Category.Generator:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Generator());
-                toolbar.gameObject.SetActive(true);
-                toolbar.ResetAll(true);
-                toolbar.Disable(0, true);
-                spriteSelector.Open(category);
+                Toolbar.Instance.gameObject.SetActive(true);
+                Toolbar.Instance.ResetAll(true);
+                Toolbar.Instance.Disable(0, true);
+                SpriteSelector.Instance.Open(category);
                 break;
             case Category.Save:
                 break;
             case Category.Multiplayer:
                 break;
         }
-        toolbar.UpdateValue();
+        Toolbar.Instance.UpdateValue();
     }
     public class Editor_Cell : StateBase
     {
@@ -98,9 +96,16 @@ public class Categories : MonoBehaviour
                     c = EditorPad.Instance.ec.CellFromPosition(b);
                     if (!EditorPad.Instance.removal && c == null)
                     {
-                        EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, EditorPad.Instance.roomEditor.currentTag.room));
+                        if (SpriteSelector.Instance.selectionIndex == 16)
+                        {
+                            EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room));
+                        }
+                        else
+                        {
+                            EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room, SpriteSelector.Instance.selectionIndex);
+                        }
                     }
-                    else if (EditorPad.Instance.removal && c && c.room == EditorPad.Instance.roomEditor.currentTag.room)
+                    else if (EditorPad.Instance.removal && c && c.room == RoomEditor.Instance.currentTag.room)
                     {
                         EditorPad.Instance.ec.DestroyCell(EditorPad.Instance.ec.CellFromPosition(b));
                     }
@@ -120,7 +125,7 @@ public class Categories : MonoBehaviour
                     }
                     else
                     {
-                        EditorPad.Instance.CreateIcon(b);
+                        EditorPad.Instance.CreateIcon(b, SpriteSelector.Instance.Selection);
                     }
                 }
             };
@@ -128,13 +133,31 @@ public class Categories : MonoBehaviour
     }
     public class Editor_Door : StateBase
     {
+        bool hasPosA;
+        IntVector2 posA;
         public override void Enter() => EditorPad.Instance.tool.subscribe = (a) =>
             {
-                if (a.Length != 2)
+                Debug.Log(hasPosA);
+                if (!hasPosA)
                 {
+                    hasPosA = true;
+                    posA = a[0];
                     return;
                 }
-
+                Direction direction = Directions.FromPointAToB(posA, a[0]);
+                if (EditorPad.Instance.ec.CellFromPosition(posA) && EditorPad.Instance.ec.CellFromPosition(a[0]))
+                {
+                    if (EditorPad.Instance.removal)
+                    {
+                        EditorPad.Instance.ec.DestroyDoor(posA, direction);
+                    }
+                    else
+                    {
+                        EditorPad.Instance.ec.CreateDoor(posA, direction, SpriteSelector.Instance.Selection);
+                    }
+                }
+                hasPosA = false;
+                EditorPad.Instance.tool.state.ForceReset();
             };
         public override void Exit() => EditorPad.Instance.tool.subscribe = null;
     }

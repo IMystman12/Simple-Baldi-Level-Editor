@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class RoomEditor : MonoBehaviour
+public class RoomEditor : Singleton<RoomEditor>
 {
     public RoomTag tagPref;
     public Transform tagManager;
@@ -52,7 +52,7 @@ public class RoomEditor : MonoBehaviour
     public TMP_InputField nameField;
     public void ApplyName()
     {
-        if (!string.IsNullOrEmpty(nameField.text) && !string.IsNullOrWhiteSpace(nameField.text))
+        if (!string.IsNullOrWhiteSpace(nameField.text))
         {
             currentTag.room.name = nameField.text;
             currentTag.UpdateName();

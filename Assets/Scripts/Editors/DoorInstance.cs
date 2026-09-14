@@ -1,7 +1,7 @@
 using System.Linq;
 using UnityEngine;
 
-public class DoorTag : MonoBehaviour, IClickable
+public class DoorInstance : MonoBehaviour
 {
     public Door door;
     public SpriteRenderer spriteRenderer;
@@ -11,19 +11,7 @@ public class DoorTag : MonoBehaviour, IClickable
         if (spriteRenderer)
         {
             spriteRenderer.color = EditorPad.Instance.ec.CellFromPosition(door.position).room.color;
-            //spriteRenderer.sprite = EditorPad.Instance.sprites.FirstOrDefault(a => a.name == door.spriteName) ?? spriteRenderer.sprite;
+            spriteRenderer.sprite = SpriteSelector.Instance.doors.FirstOrDefault(a => a.name == door.spriteName) ?? spriteRenderer.sprite;
         }
-    }
-
-    public void Clicked()
-    {
-    }
-
-    public void OffHighlight()
-    {
-    }
-
-    public void OnHighlight()
-    {
     }
 }

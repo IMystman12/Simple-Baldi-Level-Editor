@@ -10,9 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4421172248299483045}
   - component: {fileID: 4421172248299483046}
-  - component: {fileID: 4421172248299483047}
   m_Layer: 6
-  m_Name: DoorTag
+  m_Name: DoorInstance
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -52,22 +51,6 @@ MonoBehaviour:
     direction: 0
     spriteName: 
   spriteRenderer: {fileID: 6917071358303051093}
---- !u!58 &4421172248299483047
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4421172248299483044}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.5
 --- !u!1 &5199971056716466308
 GameObject:
   m_ObjectHideFlags: 0
