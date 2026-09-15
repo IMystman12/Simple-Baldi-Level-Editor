@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -36,7 +37,8 @@ public class SpriteSelector : Singleton<SpriteSelector>
         gameObject.SetActive(true);
         switch (category)
         {
-            case Categories.Category.None:
+            case Categories.Category.Room:
+                sprites = rooms;
                 break;
             case Categories.Category.Cell:
                 sprites = cells;
@@ -49,12 +51,6 @@ public class SpriteSelector : Singleton<SpriteSelector>
                 break;
             case Categories.Category.Generator:
                 sprites = generators;
-                break;
-            case Categories.Category.Options:
-                break;
-            case Categories.Category.Save:
-                break;
-            case Categories.Category.Multiplayer:
                 break;
         }
         for (int i = 0; i < toggles.Count; i++)
@@ -78,6 +74,7 @@ public class SpriteSelector : Singleton<SpriteSelector>
         gameObject.SetActive(false);
     }
 
+    public Sprite[] rooms = new Sprite[8];
     public Sprite[] cells = new Sprite[17];
     public Sprite[] icons = new Sprite[17];
     public Sprite[] doors = new Sprite[17];

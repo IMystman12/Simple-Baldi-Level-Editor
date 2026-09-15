@@ -10,9 +10,10 @@ public class IconTag : MonoBehaviour, IClickable
     {
         icon = new Icon()
         {
-            spriteName = spriteRenderer.sprite.name,
             position = transform.position,
-            rotation = transform.eulerAngles.z
+            rotation = transform.eulerAngles.z,
+            color = spriteRenderer.color,
+            spriteName = spriteRenderer.sprite.name,
         };
         UpdateFromData();
     }

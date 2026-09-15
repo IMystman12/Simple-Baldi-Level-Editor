@@ -7,6 +7,7 @@ public class OptionEditor : Singleton<OptionEditor>
     {
         EditorPad.Instance.Pause(true);
         gameObject.SetActive(true);
+        ShowSize();
     }
     public void Close()
     {
@@ -37,7 +38,7 @@ public class OptionEditor : Singleton<OptionEditor>
                 return;
             }
         }
-        UpdateSize(result);
+        EditorPad.Instance.ec.Resize(result);
     }
     public void ShowSize() => sizeField.text = string.Join(",", EditorPad.Instance.ec.size.x, EditorPad.Instance.ec.size.z);
 
@@ -45,20 +46,15 @@ public class OptionEditor : Singleton<OptionEditor>
     public Camera mapRender;
     public void UpdateSize(IntVector2 newSize)
     {
-        EditorPad.Instance.ec.ReSize(newSize);
-
         mapTex.Release();
         mapTex.width = newSize.x * 16;
         mapTex.height = newSize.z * 16;
         mapTex.Create();
 
-        mapRender.transform.position = (Vector2)EditorPad.Instance.ec.size / 2;
-        Vector3 vector = mapRender.transform.position;
-        vector.z = -1;
-        vector.y -= 0.5f;
-        vector.x -= 0.5f;
+        Vector3 vector = new Vector3(newSize.x / 2 - 0.5f, newSize.z / 2 - 0.5f, -1);
         mapRender.transform.position = vector;
-        mapRender.orthographicSize = Mathf.Max(newSize.x, newSize.z) / 2;
+        mapRender.aspect = (float)newSize.x / newSize.z;
+        mapRender.orthographicSize = newSize.z / 2f;
     }
 
     public GameObject guide;

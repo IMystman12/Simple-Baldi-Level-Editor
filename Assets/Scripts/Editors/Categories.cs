@@ -6,6 +6,7 @@ public class Categories : Singleton<Categories>
 {
     public enum Category
     {
+        Room = -2,
         None = -1,
         Cell,
         Icon,
@@ -79,7 +80,13 @@ public class Categories : Singleton<Categories>
                 Toolbar.Instance.Disable(0, true);
                 SpriteSelector.Instance.Open(category);
                 break;
+            case Category.Options:
+                OptionEditor.Instance.Open();
+                toggles[(int)Category.Options].isOn = false;
+                break;
             case Category.Save:
+                SaveEditor.Instance.Open();
+                toggles[(int)Category.Save].isOn = false;
                 break;
             case Category.Multiplayer:
                 break;
@@ -137,7 +144,6 @@ public class Categories : Singleton<Categories>
         IntVector2 posA;
         public override void Enter() => EditorPad.Instance.tool.subscribe = (a) =>
             {
-                Debug.Log(hasPosA);
                 if (!hasPosA)
                 {
                     hasPosA = true;
@@ -145,7 +151,7 @@ public class Categories : Singleton<Categories>
                     return;
                 }
                 Direction direction = Directions.FromPointAToB(posA, a[0]);
-                if (EditorPad.Instance.ec.CellFromPosition(posA) && EditorPad.Instance.ec.CellFromPosition(a[0]))
+                if (direction != Direction.Null && EditorPad.Instance.ec.CellFromPosition(posA) && EditorPad.Instance.ec.CellFromPosition(a[0]))
                 {
                     if (EditorPad.Instance.removal)
                     {

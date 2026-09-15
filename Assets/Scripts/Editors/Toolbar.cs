@@ -29,7 +29,7 @@ public class Toolbar : Singleton<Toolbar>
         protected bool submit => Input.GetMouseButton(0);
         protected bool submitDelayed => Input.GetMouseButtonDown(0);
         public Action<IntVector2[]> subscribe;
-        protected void ReceivePosition(params IntVector2[] positions) => subscribe.Invoke(positions);
+        protected void ReceivePosition(params IntVector2[] positions) => subscribe?.Invoke(positions);
         public virtual void ForceReset()
         { }
     }

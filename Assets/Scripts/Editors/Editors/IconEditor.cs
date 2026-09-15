@@ -63,7 +63,7 @@ public class IconEditor : Singleton<IconEditor>
     public void TryApplyColor()
     {
         string[] array = colorField.text.Split(',');
-        if (array.Length < 3)
+        if (array.Length < 4)
         {
             ShowColor();
             return;
@@ -85,5 +85,5 @@ public class IconEditor : Singleton<IconEditor>
         currentTag.icon.color = result;
         currentTag.UpdateFromData();
     }
-    void ShowColor() => colorField.text = string.Join(",", currentTag.icon.color.r * 255, currentTag.icon.color.g * 255, currentTag.icon.color.b * 255);
+    void ShowColor() => colorField.text = string.Join(",", currentTag.icon.color.r * 255, currentTag.icon.color.g * 255, currentTag.icon.color.b * 255, currentTag.icon.color.a * 255);
 }

@@ -1,10 +1,17 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class EditorPad : Singleton<EditorPad>
 {
+    public EnvironmentController ecPref;
     public EnvironmentController ec;
+    public void Initialize()
+    {
+        ec = Instantiate(ecPref);
+        ec.Resize(new IntVector2(64, 64));
+    }
+    public void Clear() => Destroy(ec.gameObject);
+
     public StateMachine editorState = new StateMachine();
 
     public Toolbar.ToolStateMachine tool = new Toolbar.ToolStateMachine();
@@ -60,14 +67,15 @@ public class EditorPad : Singleton<EditorPad>
 
     public IconTag iconPref;
     public List<IconTag> icons = new List<IconTag>();
-    public void CreateIcon(IntVector2 pos, Sprite sprite)
+    public IconTag CreateIcon(IntVector2 pos, Sprite sprite)
     {
         var ico = Instantiate(iconPref, IntVector2.ToVector2(pos), Quaternion.identity, ec.transform);
         ico.spriteRenderer.sprite = sprite;
-        ico.icon.spriteName = sprite.name;
+        ico.icon.spriteName = sprite ? sprite.name : "Icon_Item";
         ico.UpdateFromData();
         ec.icons.Add(ico.icon);
         icons.Add(ico);
+        return ico;
     }
     public void DestroyIcon(IntVector2 pos)
     {
@@ -91,25 +99,23 @@ public class EditorPad : Singleton<EditorPad>
         icons.Remove(icon);
         Destroy(icon.gameObject);
     }
-
-
-    public DoorInstance doorPref;
-    public List<DoorInstance> doors = new List<DoorInstance>();
-    public void CreateDoor(IntVector2 pos)
+    public void DestroyAllIcons()
     {
-        var ico = Instantiate(iconPref, IntVector2.ToVector2(pos), Quaternion.identity, ec.transform);
-        ec.icons.Add(ico.icon);
-        icons.Add(ico);
+        for (; icons.Count > 0;)
+        {
+            DestroyIcon(icons[0]);
+        }
     }
-    public void DestroyDoor(IconTag icon)
+
+    public List<string> undo = new List<string>();
+    public void TakeAction(string action, bool addToList)
     {
-        ec.icons.Remove(icon.icon);
-        icons.Remove(icon);
-        Destroy(icon.gameObject);
+
     }
 
     private void Start()
     {
+        Initialize();
         RoomEditor.Instance.CreateRoom();
         tool.subscribe += (a) => Debug.Log($"Points Received: {string.Join(",,", a)}");
     }
@@ -130,4 +136,8 @@ public interface IClickable
     void OnHighlight();
     void Clicked();
     void OffHighlight();
+}
+public enum EditorActions
+{
+
 }

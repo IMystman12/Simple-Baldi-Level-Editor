@@ -50,7 +50,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: fbc28479482a49a418462989a286cad7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -178,10 +178,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abcde5c8b6799b344a3cf88fc5672abc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  autoConnect: 1
   room:
+    name: Room
     color: {r: 0, g: 0, b: 0, a: 0}
     cells: []
+    doors: []
   data:
     id: 15
     position:

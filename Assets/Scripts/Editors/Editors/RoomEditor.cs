@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
@@ -17,19 +18,49 @@ public class RoomEditor : Singleton<RoomEditor>
         ShowColor();
         EditorPad.Instance.Pause(true);
         gameObject.SetActive(true);
+        SpriteSelector.Instance.Open(Categories.Category.Room);
     }
     public void Close()
     {
+        SpriteSelector.Instance.Close();
         gameObject.SetActive(false);
         EditorPad.Instance.Pause(false);
     }
     public void CreateRoom()
     {
         gameObject.SetActive(false);
-        var tag = Instantiate(tagPref, tagManager);
-        tag.room = EditorPad.Instance.ec.CreateRoom(Color.white);
-        tags.Add(tag);
+        EditorPad.Instance.ec.CreateRoom(Color.white);
+        UpdateTags();
         Open(tags[tags.Count - 1]);
+    }
+    public void UpdateTags()
+    {
+        var ec = EditorPad.Instance.ec;
+        for (int i = 0; i < tags.Count;)
+        {
+            if (!ec.rooms.Contains(tags[i].room))
+            {
+                Destroy(tags[i].gameObject);
+                tags.RemoveAt(i);
+            }
+            else
+            {
+                i++;
+            }
+        }
+
+        RoomTag tag;
+        for (int i = 0; i < ec.rooms.Count; i++)
+        {
+            if (!tags.Any(a => a.room == ec.rooms[i]))
+            {
+                tag = Instantiate(tagPref, tagManager);
+                tag.room = ec.rooms[i];
+                tag.UpdateName();
+                tags.Add(tag);
+            }
+        }
+
         RequeueTags();
     }
     void RequeueTags()
