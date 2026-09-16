@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -11,31 +9,37 @@ public class CellInstance : MonoBehaviour
     MaterialPropertyBlock materialPropertyBlock;
     public void ChangeColor()
     {
-        rendererBase.color = room.color;
-
-        if (materialPropertyBlock == null)
+        if (rendererBase)
         {
-            materialPropertyBlock = new MaterialPropertyBlock();
+            rendererBase.color = room.color;
         }
-        rendererBG.GetPropertyBlock(materialPropertyBlock);
-        materialPropertyBlock.Clear();
-        rendererBG.SetPropertyBlock(materialPropertyBlock);
 
-        var color = room.color;
-        color.a = 0.25f;
-        materialPropertyBlock.SetColor("_Color", color);
-
-
-        if (SpriteSelector.Instance)
+        if (rendererBG)
         {
-            var sprite = SpriteSelector.Instance.rooms.FirstOrDefault(a => a.name == room.mapBGName);
-            if (sprite)
+            if (materialPropertyBlock == null)
             {
-                materialPropertyBlock.SetTexture("_BgTex", sprite.texture);
+                materialPropertyBlock = new MaterialPropertyBlock();
             }
-        }
+            rendererBG.GetPropertyBlock(materialPropertyBlock);
+            materialPropertyBlock.Clear();
+            rendererBG.SetPropertyBlock(materialPropertyBlock);
 
-        rendererBG.SetPropertyBlock(materialPropertyBlock);
+            var color = room.color;
+            color.a = 0.25f;
+            materialPropertyBlock.SetColor("_Color", color);
+
+
+            if (SpriteSelector.Instance)
+            {
+                var sprite = SpriteSelector.Instance.rooms.FirstOrDefault(a => a.name == room.mapBGName);
+                if (sprite)
+                {
+                    materialPropertyBlock.SetTexture("_BgTex", sprite.texture);
+                }
+            }
+
+            rendererBG.SetPropertyBlock(materialPropertyBlock);
+        }
     }
 }
 

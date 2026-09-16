@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -35,10 +36,11 @@ public class Toolbar : Singleton<Toolbar>
     }
     public class Tool_Painter : Tool_StateBase
     {
+        public static bool clickMode;
         IntVector2 pos = IntVector2.one * -1;
         public override void Update()
         {
-            if (fitForBuild && submit && pos != EditorPad.Instance.cursorGridPos)
+            if (fitForBuild && (clickMode ? submitDelayed : submit) && pos != EditorPad.Instance.cursorGridPos)
             {
                 pos = EditorPad.Instance.cursorGridPos;
                 ReceivePosition(pos);
@@ -49,36 +51,43 @@ public class Toolbar : Singleton<Toolbar>
     public class Tool_Area : Tool_StateBase
     {
         public bool first = true;
-        public IntVector2 posA;
+        public IntVector2 posA, gridPos;
+        string _string;
+        public override void Enter() => Instance.tip.text = string.Empty;
         public override void Update()
         {
-            if (fitForBuild && submitDelayed)
+            if (fitForBuild)
             {
-                if (first)
+                gridPos = EditorPad.Instance.cursorGridPos;
+                _string = first ? "TBD" : $"({Mathf.Abs(posA.x - gridPos.x) + 1}, {Mathf.Abs(posA.z - gridPos.z) + 1})";
+                Instance.tip.text = $"Selected Size: {_string}";
+                if (submitDelayed)
                 {
-                    first = false;
-                    posA = EditorPad.Instance.cursorGridPos;
-                    Debug.Log("PosA ready");
-                }
-                else
-                {
-                    var posB = EditorPad.Instance.cursorGridPos;
-                    List<IntVector2> positions = new List<IntVector2>();
-                    for (int j = Mathf.Min(posA.z, posB.z), j0 = Mathf.Max(posA.z, posB.z); j <= j0; j++)
+                    if (first)
                     {
-                        for (int i = Mathf.Min(posA.x, posB.x), i0 = Mathf.Max(posA.x, posB.x); i <= i0; i++)
-                        {
-                            positions.Add(new IntVector2(i, j));
-                        }
+                        first = false;
+                        posA = gridPos;
                     }
-                    ReceivePosition(positions.ToArray());
-                    first = true;
-                    Debug.Log("PosB ready");
+                    else
+                    {
+                        var posB = gridPos;
+                        List<IntVector2> positions = new List<IntVector2>();
+                        for (int j = Mathf.Min(posA.z, posB.z), j0 = Mathf.Max(posA.z, posB.z); j <= j0; j++)
+                        {
+                            for (int i = Mathf.Min(posA.x, posB.x), i0 = Mathf.Max(posA.x, posB.x); i <= i0; i++)
+                            {
+                                positions.Add(new IntVector2(i, j));
+                            }
+                        }
+                        ReceivePosition(positions.ToArray());
+                        first = true;
+                    }
                 }
             }
         }
+        public override void Exit() => Instance.tip.text = string.Empty;
     }
-
+    public TMP_Text tip;
     public Toggle[] tools = new Toggle[2];
     public Toggle remove;
     public void Disable(int i, bool val)

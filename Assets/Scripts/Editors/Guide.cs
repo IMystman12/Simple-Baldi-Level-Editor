@@ -11,8 +11,6 @@ public class Guide : MonoBehaviour
         if (!EditorPad.Instance.pause && EditorPad.Instance.inArea)
         {
             vector = (Vector3)IntVector2.ToVector2(EditorPad.Instance.cursorGridPos) + Vector3.forward * 10;
-            vector.x = Mathf.Clamp(vector.x, 0, EditorPad.Instance.ec.realSize.x);
-            vector.y = Mathf.Clamp(vector.y, 0, EditorPad.Instance.ec.realSize.z);
             cursorCrossX.transform.position = vector;
             cursorCrossY.transform.position = vector;
         }

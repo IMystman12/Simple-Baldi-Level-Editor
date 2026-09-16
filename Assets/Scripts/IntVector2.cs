@@ -166,7 +166,7 @@ public struct IntVector2
 		return intVector.Scale(Directions.CellDataRotationVector(direction));
 	}
 
-	public override string ToString() => string.Format("{0},{1}", x, z);
+	public override string ToString() => string.Format("({0}, {1})", x, z);
 
 	public int this[int index]
 	{

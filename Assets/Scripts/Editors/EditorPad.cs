@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class EditorPad : Singleton<EditorPad>
@@ -15,7 +16,15 @@ public class EditorPad : Singleton<EditorPad>
     public StateMachine editorState = new StateMachine();
 
     public Toolbar.ToolStateMachine tool = new Toolbar.ToolStateMachine();
-    public IntVector2 cursorGridPos => IntVector2.GetGridPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+    public TMP_Text positionTip;
+    public IntVector2 cursorGridPos;
+    void GridPositionUpdate()
+    {
+        cursorGridPos = IntVector2.GetGridPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+        cursorGridPos.x = Mathf.Clamp(cursorGridPos.x, 0, ec.realSize.x);
+        cursorGridPos.z = Mathf.Clamp(cursorGridPos.z, 0, ec.realSize.z);
+        positionTip.text = cursorGridPos.ToString();
+    }
     public bool removal;
 
     [HideInInspector] public bool inArea;
@@ -127,6 +136,7 @@ public class EditorPad : Singleton<EditorPad>
 
         if (!pause)
         {
+            GridPositionUpdate();
             CameraUpdate();
             ClickUpdate();
         }

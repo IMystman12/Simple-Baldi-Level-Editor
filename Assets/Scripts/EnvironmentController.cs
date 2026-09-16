@@ -64,37 +64,12 @@ public class EnvironmentController : MonoBehaviour
     {
         size = sizeNew;
         realSize = sizeNew - IntVector2.one;
-        CellInstance[,] overrode = new CellInstance[sizeNew.x, sizeNew.z];
-        List<CellInstance> cellsSaved = new List<CellInstance>();
-        if (cells != null)
-        {
-            int ae = Mathf.Min(sizeNew.x, cells.GetLength(0)), be = Mathf.Min(sizeNew.z, cells.GetLength(1));
-            for (int a = 0; a < ae; a++)
-            {
-                for (int b = 0; b < be; b++)
-                {
-                    overrode[a, b] = cells[a, b];
-                    cellsSaved.Add(cells[a, b]);
-                }
-            }
-            for (int a = 0; a < cells.GetLength(0); a++)
-            {
-                for (int b = 0; b < cells.GetLength(1); b++)
-                {
-                    if (!cellsSaved.Contains(cells[a, b]))
-                    {
-                        DestroyCell(cells[a, b]);
-                    }
-                }
-            }
-        }
-        cells = overrode;
         OptionEditor.Instance?.UpdateSize(sizeNew);
     }
     public Sprite[] cellSprites = new Sprite[16];
     public CellInstance cellPref;
 
-    public CellInstance[,] cells;
+    public Dictionary<IntVector2, CellInstance> cells = new Dictionary<IntVector2, CellInstance>();
 
     public DoorInstance doorPref;
     public List<DoorInstance> doors = new List<DoorInstance>();
@@ -162,29 +137,37 @@ public class EnvironmentController : MonoBehaviour
     {
         if (ContainsCoordinates(position))
         {
+            CellInstance cellInstance;
             if (!CellFromPosition(position))
             {
-                var cellInstance = Instantiate(cellPref, (Vector2)position, Quaternion.identity, transform);
-                cells[position.x, position.z] = cellInstance;
+                cellInstance = Instantiate(cellPref, (Vector2)position, Quaternion.identity, transform);
                 cellInstance.data.position = position;
                 cellInstance.room = room;
                 cellInstance.room.cells.Add(cellInstance.data);
                 cellInstance.ChangeColor();
                 cellInstance.data.id = id;
                 cellInstance.rendererBase.sprite = cellSprites[id];
-                return cellInstance;
             }
             else
             {
-                var cellInstance = CellFromPosition(position);
+                cellInstance = CellFromPosition(position);
                 cellInstance.room.cells.Remove(cellInstance.data);
                 cellInstance.room = room;
                 cellInstance.room.cells.Add(cellInstance.data);
                 cellInstance.ChangeColor();
                 cellInstance.data.id = id;
                 cellInstance.rendererBase.sprite = cellSprites[id];
-                return cellInstance;
             }
+
+            if (cells.ContainsKey(position))
+            {
+                cells[position] = cellInstance;
+            }
+            else
+            {
+                cells.Add(position, cellInstance);
+            }
+            return cellInstance;
         }
         return null;
     }
@@ -267,9 +250,9 @@ public class EnvironmentController : MonoBehaviour
     public CellInstance CellFromPosition(IntVector2 vector)
     {
         IntVector2 vectorA = IntVector2.GetGridPosition(vector);
-        if (ContainsCoordinates(vector))
+        if (ContainsCoordinates(vector) && cells.ContainsKey(vectorA))
         {
-            return cells[vectorA.x, vectorA.z];
+            return cells[vectorA];
         }
         return null;
     }

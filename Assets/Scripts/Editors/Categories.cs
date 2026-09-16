@@ -142,30 +142,44 @@ public class Categories : Singleton<Categories>
     {
         bool hasPosA;
         IntVector2 posA;
-        public override void Enter() => EditorPad.Instance.tool.subscribe = (a) =>
-            {
-                if (!hasPosA)
+        public override void Enter()
+        {
+            Toolbar.Instance.tip.text = "Door: Position?";
+            Toolbar.Tool_Painter.clickMode = true;
+            EditorPad.Instance.tool.subscribe = (a) =>
                 {
-                    hasPosA = true;
-                    posA = a[0];
-                    return;
-                }
-                Direction direction = Directions.FromPointAToB(posA, a[0]);
-                if (direction != Direction.Null && EditorPad.Instance.ec.CellFromPosition(posA) && EditorPad.Instance.ec.CellFromPosition(a[0]))
-                {
-                    if (EditorPad.Instance.removal)
+                    if (!hasPosA)
                     {
-                        EditorPad.Instance.ec.DestroyDoor(posA, direction);
+                        hasPosA = true;
+                        posA = a[0];
+                        Toolbar.Instance.tip.text = "Door: Direction?";
                     }
-                    else
+                    else if (Mathf.Abs(posA.x - a[0].x) != Mathf.Abs(posA.z - a[0].z) && (Mathf.Abs(posA.x - a[0].x) == 1 || Mathf.Abs(posA.z - a[0].z) == 1))
                     {
-                        EditorPad.Instance.ec.CreateDoor(posA, direction, SpriteSelector.Instance.Selection);
+                        Toolbar.Instance.tip.text = "Door: Position?";
+                        Direction direction = Directions.FromPointAToB(posA, a[0]);
+                        if (direction != Direction.Null && EditorPad.Instance.ec.CellFromPosition(posA))
+                        {
+                            if (EditorPad.Instance.removal)
+                            {
+                                EditorPad.Instance.ec.DestroyDoor(posA, direction);
+                            }
+                            else
+                            {
+                                EditorPad.Instance.ec.CreateDoor(posA, direction, SpriteSelector.Instance.Selection);
+                            }
+                        }
+                        hasPosA = false;
+                        EditorPad.Instance.tool.state.ForceReset();
                     }
-                }
-                hasPosA = false;
-                EditorPad.Instance.tool.state.ForceReset();
-            };
-        public override void Exit() => EditorPad.Instance.tool.subscribe = null;
+                };
+        }
+        public override void Exit()
+        {
+            Toolbar.Tool_Painter.clickMode = false;
+            Toolbar.Instance.tip.text = string.Empty;
+            EditorPad.Instance.tool.subscribe = null;
+        }
     }
     public class Editor_Generator : StateBase
     {
