@@ -38,12 +38,14 @@ public class SaveEditor : Singleton<SaveEditor>
         var flag = OptionEditor.Instance.guide.activeSelf;
         OptionEditor.Instance.guide.SetActive(false);
 
+        Shader.DisableKeyword("_BG_REQUIRED");
         OptionEditor.Instance.mapRender.Render();
         Texture2D tex = new Texture2D(mapTex.width, mapTex.height, TextureFormat.RGBA32, false, false);
         RenderTexture.active = mapTex;
         tex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
         tex.Apply(false, false);
         tex.filterMode = FilterMode.Point;
+        Shader.EnableKeyword("_BG_REQUIRED");
 
         OptionEditor.Instance.guide.SetActive(flag);
 

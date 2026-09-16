@@ -116,6 +116,7 @@ public class EditorPad : Singleton<EditorPad>
     private void Start()
     {
         Initialize();
+        Shader.EnableKeyword("_BG_REQUIRED");
         RoomEditor.Instance.CreateRoom();
         tool.subscribe += (a) => Debug.Log($"Points Received: {string.Join(",,", a)}");
     }

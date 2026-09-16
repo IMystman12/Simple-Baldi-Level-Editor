@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class SpriteSelector : Singleton<SpriteSelector>
@@ -10,11 +11,11 @@ public class SpriteSelector : Singleton<SpriteSelector>
     public Sprite Selection => selectionIndex < 0 || selectionIndex >= sprites.Length ? null : sprites[selectionIndex];
     public Toggle togglePref;
     public List<Toggle> toggles = new List<Toggle>();
-    public int page, togglePerPage = 15, selectionIndex;
+    public int page, togglePerPage = 15, selectionIndex, maxPage;
+    const float padding = 32 + 5;
     public void MovePage(int dir)
     {
         page += dir;
-        int maxPage = Mathf.CeilToInt((float)toggles.Count / togglePerPage);
         if (page < 0)
         {
             page = maxPage - 1;
@@ -23,14 +24,29 @@ public class SpriteSelector : Singleton<SpriteSelector>
         {
             page = 0;
         }
-        for (int i = page * togglePerPage, j = 1, i0 = Mathf.Min((page + 1) * togglePerPage, toggles.Count); i < i0; i++, j++)
+        toggles.ForEach(a => a.transform.localPosition = togglePref.transform.localPosition + new Vector3(padding * 3, 0, 0));
+        for (int i = page * togglePerPage, j = 0, i0 = Mathf.Min((page + 1) * togglePerPage, toggles.Count); i < i0; i++, j++)
         {
-            toggles[i].transform.SetSiblingIndex(j);
+            toggles[i].transform.localPosition = togglePref.transform.localPosition + new Vector3(padding * (j % 3), -padding * Mathf.FloorToInt(j / 3), 0);
         }
         CheckValue();
     }
 
-    public void CheckValue() => selectionIndex = toggles.IndexOf(toggles.FirstOrDefault(a => a.isOn));
+    public void TryToSetValue(string spriteName)
+    {
+        var toggle = toggles.FirstOrDefault(a => a.image.sprite.name == spriteName);
+        if (toggle)
+        {
+            toggle.isOn = true;
+        }
+        CheckValue();
+    }
+    public UnityEvent onCheckValue;
+    public void CheckValue()
+    {
+        selectionIndex = toggles.IndexOf(toggles.FirstOrDefault(a => a.isOn));
+        onCheckValue?.Invoke();
+    }
 
     public void Open(Categories.Category category)
     {
@@ -67,10 +83,12 @@ public class SpriteSelector : Singleton<SpriteSelector>
             toggles.Add(t);
         }
         page = 0;
+        maxPage = Mathf.CeilToInt((float)toggles.Count / togglePerPage);
         MovePage(0);
     }
     public void Close()
     {
+        onCheckValue?.RemoveAllListeners();
         gameObject.SetActive(false);
     }
 

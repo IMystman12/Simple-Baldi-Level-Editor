@@ -16,9 +16,17 @@ public class RoomEditor : Singleton<RoomEditor>
         nameField.text = currentTag.room.name;
         ApplyName();
         ShowColor();
+        
         EditorPad.Instance.Pause(true);
         gameObject.SetActive(true);
+
         SpriteSelector.Instance.Open(Categories.Category.Room);
+        SpriteSelector.Instance.TryToSetValue(roomTag.room.mapBGName);
+        SpriteSelector.Instance.onCheckValue?.AddListener(() =>
+        {
+            roomTag.room.mapBGName = SpriteSelector.Instance.Selection.name;
+            roomTag.room.ChangeColor(EditorPad.Instance.ec);
+        });
     }
     public void Close()
     {

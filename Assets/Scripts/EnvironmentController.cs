@@ -26,6 +26,7 @@ public class EnvironmentController : MonoBehaviour
                 roomCopied = asset.rooms[i];
                 roomCreated = CreateRoom(roomCopied.color);
                 roomCreated.name = roomCopied.name;
+                roomCreated.mapBGName = roomCopied.mapBGName;
                 for (int j = 0; j < roomCopied.cells.Count; j++)
                 {
                     cellCopied = roomCopied.cells[j];
@@ -242,9 +243,14 @@ public class EnvironmentController : MonoBehaviour
         {
             DestroyCell(CellFromPosition(a.position));
         }
+        DoorInstance doorInstance;
         foreach (var a in room.doors)
         {
-            DestroyDoor(a.position, a.direction);
+            doorInstance = doors.FirstOrDefault(b => b.door == a);
+            if (doorInstance)
+            {
+                Destroy(doorInstance.gameObject);
+            }
         }
     }
 
@@ -272,7 +278,7 @@ public class EnvironmentController : MonoBehaviour
 [Serializable]
 public class Room
 {
-    public string name = "Room",mapBGName;
+    public string name = "Room", mapBGName = "Transparent";
     public Color color = Color.white;
     public List<Cell> cells = new List<Cell>();
     public List<Door> doors = new List<Door>();
@@ -281,6 +287,10 @@ public class Room
         for (int i = 0; i < cells.Count; i++)
         {
             ec.CellFromPosition(cells[i].position)?.ChangeColor();
+        }
+        for (int i = 0; i < doors.Count; i++)
+        {
+            ec.doors.FirstOrDefault(a => a.door == doors[i])?.UpdateFromData();
         }
     }
 }

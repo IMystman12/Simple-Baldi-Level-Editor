@@ -5,7 +5,6 @@ public class DoorInstance : MonoBehaviour
 {
     public Door door;
     public SpriteRenderer spriteRenderer;
-    void Start() => UpdateFromData();
     public void UpdateFromData()
     {
         if (spriteRenderer)
