@@ -27,8 +27,6 @@ public class Toolbar : Singleton<Toolbar>
     public class Tool_StateBase : StateBase
     {
         protected bool fitForBuild => EditorPad.Instance.inArea && EditorPad.Instance.ec.ContainsCoordinates(EditorPad.Instance.cursorGridPos);
-        protected bool submit => Input.GetMouseButton(0);
-        protected bool submitDelayed => Input.GetMouseButtonDown(0);
         public Action<IntVector2[]> subscribe;
         protected void ReceivePosition(params IntVector2[] positions) => subscribe?.Invoke(positions);
         public virtual void ForceReset()
@@ -40,7 +38,7 @@ public class Toolbar : Singleton<Toolbar>
         IntVector2 pos = IntVector2.one * -1;
         public override void Update()
         {
-            if (fitForBuild && (clickMode ? submitDelayed : submit) && pos != EditorPad.Instance.cursorGridPos)
+            if (fitForBuild && (clickMode ? EditorPad.SubmitDelayed : EditorPad.Submit) && pos != EditorPad.Instance.cursorGridPos)
             {
                 pos = EditorPad.Instance.cursorGridPos;
                 ReceivePosition(pos);
@@ -61,7 +59,7 @@ public class Toolbar : Singleton<Toolbar>
                 gridPos = EditorPad.Instance.cursorGridPos;
                 _string = first ? "TBD" : $"({Mathf.Abs(posA.x - gridPos.x) + 1}, {Mathf.Abs(posA.z - gridPos.z) + 1})";
                 Instance.tip.text = $"Selected Size: {_string}";
-                if (submitDelayed)
+                if (EditorPad.SubmitDelayed)
                 {
                     if (first)
                     {
@@ -90,6 +88,19 @@ public class Toolbar : Singleton<Toolbar>
     public TMP_Text tip;
     public Toggle[] tools = new Toggle[2];
     public Toggle remove;
+    public void Open()
+    {
+        gameObject.SetActive(true);
+        for (int i = 0; i < tools.Length + 1; i++)
+        {
+            Disable(i, false);
+        }
+    }
+    public void Close()
+    {
+        gameObject.SetActive(false);
+        EditorPad.Instance.tool.ChangeState(null);
+    }
     public void Disable(int i, bool val)
     {
         if (i < tools.Length)
@@ -98,13 +109,6 @@ public class Toolbar : Singleton<Toolbar>
             return;
         }
         remove.interactable = !val;
-    }
-    public void ResetAll(bool val)
-    {
-        for (int i = 0; i < tools.Length + 1; i++)
-        {
-            Disable(i, !val);
-        }
     }
     public void UpdateValue()
     {

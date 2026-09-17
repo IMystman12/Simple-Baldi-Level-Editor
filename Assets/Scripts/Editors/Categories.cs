@@ -22,7 +22,7 @@ public class Categories : Singleton<Categories>
     public void Reset()
     {
         SpriteSelector.Instance.Close();
-        Toolbar.Instance.gameObject.SetActive(false);
+        Toolbar.Instance.Close();
         EditorPad.Instance.editorState.ChangeState(null);
     }
     public void Pause(bool val)
@@ -56,27 +56,23 @@ public class Categories : Singleton<Categories>
                 break;
             case Category.Cell:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Cell());
-                Toolbar.Instance.gameObject.SetActive(true);
-                Toolbar.Instance.ResetAll(true);
+                Toolbar.Instance.Open();
                 SpriteSelector.Instance.Open(category);
                 break;
             case Category.Icon:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Icon());
-                Toolbar.Instance.gameObject.SetActive(true);
-                Toolbar.Instance.ResetAll(true);
+                Toolbar.Instance.Open();
                 SpriteSelector.Instance.Open(category);
                 break;
             case Category.Door:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Door());
-                Toolbar.Instance.gameObject.SetActive(true);
-                Toolbar.Instance.ResetAll(true);
+                Toolbar.Instance.Open();
                 Toolbar.Instance.Disable(1, true);
                 SpriteSelector.Instance.Open(category);
                 break;
             case Category.Generator:
                 EditorPad.Instance.editorState.ChangeState(new Editor_Generator());
-                Toolbar.Instance.gameObject.SetActive(true);
-                Toolbar.Instance.ResetAll(true);
+                Toolbar.Instance.Open();
                 Toolbar.Instance.Disable(0, true);
                 SpriteSelector.Instance.Open(category);
                 break;

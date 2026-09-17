@@ -35,21 +35,31 @@ public class EditorPad : Singleton<EditorPad>
     public void Pause(bool val)
     {
         pause = val;
+        controls.SetActive(!val && Application.isMobilePlatform);
         clkPrevious?.OffHighlight();
         categories?.Pause(val);
     }
 
-    [SerializeField] private float moveSensitivity = 10, scaleSensitivity = 10;
+    public static bool SubmitDelayed { get; set; }
+    public static bool Submit { get; set; }
+    public float movementX { get; set; }
+    public float movementY { get; set; }
+    public float zoom { get; set; }
+    public GameObject controls;
+    bool submitPrevious;
+
+    [SerializeField] private float mobileZoom = 0.001f, mobileMovement = 2, scaleSensitivity = 10;
     float val;
     Vector2 pos;
     void CameraUpdate()
     {
-        val = Time.fixedDeltaTime * (Input.GetKey(KeyCode.LeftShift) ? 5 * moveSensitivity : moveSensitivity);
-        pos.x = Mathf.Clamp(pos.x + Input.GetAxis("Horizontal") * val, 0, ec.realSize.x);
-        pos.y = Mathf.Clamp(pos.y + Input.GetAxis("Vertical") * val, 0, ec.realSize.x);
+        val = Time.fixedDeltaTime;
+        pos.x = Mathf.Clamp(pos.x + Priority(Input.GetAxis("Horizontal"), movementX * mobileMovement) * val, 0, ec.realSize.x);
+        pos.y = Mathf.Clamp(pos.y + Priority(Input.GetAxis("Vertical"), movementY * mobileMovement) * val, 0, ec.realSize.z);
         Camera.main.transform.position = new Vector3(pos.x, pos.y, Mathf.Round(transform.position.z));
-        Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + Input.GetAxis("Mouse ScrollWheel") * scaleSensitivity, 0.1f, 64);
+        Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + Priority(Input.GetAxis("Mouse ScrollWheel"), zoom * mobileZoom) * scaleSensitivity, 0.1f, 64);
     }
+    float Priority(float a, float b) => Mathf.Abs(b) > Mathf.Abs(a) ? b : a;
 
     public LayerMask availableLayers;
     RaycastHit2D hit2D;
@@ -68,7 +78,7 @@ public class EditorPad : Singleton<EditorPad>
             clkCurrent?.OnHighlight();
             clkPrevious = clkCurrent;
         }
-        if (Input.GetMouseButtonDown(0))
+        if (SubmitDelayed)
         {
             clkCurrent?.Clicked();
         }
@@ -116,12 +126,6 @@ public class EditorPad : Singleton<EditorPad>
         }
     }
 
-    public List<string> undo = new List<string>();
-    public void TakeAction(string action, bool addToList)
-    {
-
-    }
-
     private void Start()
     {
         Initialize();
@@ -133,6 +137,9 @@ public class EditorPad : Singleton<EditorPad>
     void Update()
     {
         tool?.state?.Update();
+
+        SubmitDelayed = Submit && !submitPrevious;
+        submitPrevious = Submit;
 
         if (!pause)
         {

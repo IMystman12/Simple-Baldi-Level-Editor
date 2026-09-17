@@ -9,6 +9,7 @@ public class RoomEditor : Singleton<RoomEditor>
     public Transform tagManager;
     public List<RoomTag> tags = new List<RoomTag>();
     public RoomTag currentTag;
+    public GameObject destroyButton;
     public void Open(RoomTag roomTag)
     {
         currentTag = roomTag;
@@ -16,7 +17,8 @@ public class RoomEditor : Singleton<RoomEditor>
         nameField.text = currentTag.room.name;
         ApplyName();
         ShowColor();
-        
+
+        destroyButton.gameObject.SetActive(EditorPad.Instance.ec.rooms.Count > 1);
         EditorPad.Instance.Pause(true);
         gameObject.SetActive(true);
 
@@ -30,6 +32,7 @@ public class RoomEditor : Singleton<RoomEditor>
     }
     public void Close()
     {
+        destroyButton.gameObject.SetActive(EditorPad.Instance.ec.rooms.Count > 1);
         SpriteSelector.Instance.Close();
         gameObject.SetActive(false);
         EditorPad.Instance.Pause(false);

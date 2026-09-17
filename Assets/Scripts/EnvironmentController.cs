@@ -244,6 +244,7 @@ public class EnvironmentController : MonoBehaviour
             return;
         }
         ConnectSurround(cellA, false);
+        cellA.room.cells.Remove(cellA.data);
         Destroy(cellA.gameObject);
     }
     public bool ContainsCoordinates(IntVector2 vector) => vector.x >= 0 && vector.z >= 0 && vector.x < size.x && vector.z < size.z;
@@ -261,8 +262,8 @@ public class EnvironmentController : MonoBehaviour
 [Serializable]
 public class Room
 {
-    public string name = "Room", mapBGName = "Transparent";
     public Color color = Color.white;
+    public string name = "Room", mapBGName = "Transparent";
     public List<Cell> cells = new List<Cell>();
     public List<Door> doors = new List<Door>();
     public void ChangeColor(EnvironmentController ec)
