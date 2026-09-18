@@ -30,6 +30,7 @@ public class SaveEditor : Singleton<SaveEditor>
         }
     }
 
+    public Camera mapRender => OptionEditor.Instance.mapRender;
     public RenderTexture mapTex => OptionEditor.Instance.mapTex;
     string mapTexturePath => Path.Combine(Application.persistentDataPath, levelName + ".png");
     string mapAssetPath => Path.Combine(Application.persistentDataPath, levelName + ".mapAsset");
@@ -39,7 +40,11 @@ public class SaveEditor : Singleton<SaveEditor>
         OptionEditor.Instance.guide.SetActive(false);
 
         Shader.DisableKeyword("_BG_REQUIRED");
-        OptionEditor.Instance.mapRender.Render();
+
+        mapRender.enabled = true;
+        mapRender.Render();
+        mapRender.enabled = false;
+
         Texture2D tex = new Texture2D(mapTex.width, mapTex.height, TextureFormat.RGBA32, false, false);
         RenderTexture.active = mapTex;
         tex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);

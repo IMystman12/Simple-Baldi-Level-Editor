@@ -20,7 +20,8 @@ public class EditorPad : Singleton<EditorPad>
     public IntVector2 cursorGridPos;
     void GridPositionUpdate()
     {
-        cursorGridPos = IntVector2.GetGridPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+        worldPoint = Camera.main.ScreenToWorldPoint(Application.isMobilePlatform ? TouchPosition.point : Input.mousePosition);
+        cursorGridPos = IntVector2.GetGridPosition(worldPoint);
         cursorGridPos.x = Mathf.Clamp(cursorGridPos.x, 0, ec.realSize.x);
         cursorGridPos.z = Mathf.Clamp(cursorGridPos.z, 0, ec.realSize.z);
         positionTip.text = cursorGridPos.ToString();
@@ -51,6 +52,7 @@ public class EditorPad : Singleton<EditorPad>
     [SerializeField] private float mobileZoom = 0.001f, mobileMovement = 2, scaleSensitivity = 10;
     float val;
     Vector2 pos;
+    Vector3 worldPoint;
     void CameraUpdate()
     {
         val = Time.fixedDeltaTime;
@@ -70,7 +72,7 @@ public class EditorPad : Singleton<EditorPad>
         {
             return;
         }
-        hit2D = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Camera.main.transform.forward, 99, availableLayers);
+        hit2D = Physics2D.Raycast(worldPoint, Camera.main.transform.forward, 99, availableLayers);
         clkCurrent = hit2D.transform ? hit2D.transform.GetComponent<IClickable>() : null;
         if (clkCurrent != clkPrevious)
         {
@@ -136,10 +138,10 @@ public class EditorPad : Singleton<EditorPad>
 
     void Update()
     {
-        tool?.state?.Update();
-
         SubmitDelayed = Submit && !submitPrevious;
         submitPrevious = Submit;
+
+        tool?.state?.Update();
 
         if (!pause)
         {

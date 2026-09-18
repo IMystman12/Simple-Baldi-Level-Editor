@@ -15,7 +15,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &3388785442158046868
 Transform:
@@ -98,7 +98,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &3388785443016731855
 Transform:
@@ -179,8 +179,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   room:
-    name: Room
     color: {r: 0, g: 0, b: 0, a: 0}
+    name: Room
+    mapBGName: Transparent
     cells: []
     doors: []
   data:

@@ -1,0 +1,104 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Cells
+  serializedVersion: 2
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 0
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 2048
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 4
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 2
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 1
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: 6406bae62458c824e9f11ef8dd63f395, type: 3}
+    - {fileID: 2800000, guid: ef634c097ad9ec6419b6a3537bab0eef, type: 3}
+    - {fileID: 2800000, guid: d4873460dd4c196449e0ee4f2ab38853, type: 3}
+    - {fileID: 2800000, guid: fcfa50ab701564c4688e1c39665922eb, type: 3}
+    - {fileID: 2800000, guid: 0d28159784c3e4643aa26697b5eefe55, type: 3}
+    - {fileID: 2800000, guid: 757afbf87df73f649ae9c1ecf52f6363, type: 3}
+    - {fileID: 2800000, guid: 3f31e8cc4a7da344dbd557658edb1df7, type: 3}
+    - {fileID: 2800000, guid: e926859885fe21640bc3b7050221cbf3, type: 3}
+    - {fileID: 2800000, guid: 1ae8f5c09c03c274b9355268dba4d63d, type: 3}
+    - {fileID: 2800000, guid: 0a75d7f762abe2f4fa2da1e82ee33571, type: 3}
+    - {fileID: 2800000, guid: b4866c1862aa9d14098e6d777bf9a5ae, type: 3}
+    - {fileID: 2800000, guid: 4440a5f677e48e14f9f682c10bac3dd7, type: 3}
+    - {fileID: 2800000, guid: d81f31765106dbd46ac3b61c72e8db0c, type: 3}
+    - {fileID: 2800000, guid: c4d4a4ac668191145b178f048cb77e84, type: 3}
+    - {fileID: 2800000, guid: 9b04ffbd5b15e9f43bc7035267e2778e, type: 3}
+    - {fileID: 2800000, guid: 262cdfd898aefae48878b3e924cdf73d, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: d4873460dd4c196449e0ee4f2ab38853, type: 3}
+  - {fileID: 21300000, guid: 1ae8f5c09c03c274b9355268dba4d63d, type: 3}
+  - {fileID: 21300000, guid: d81f31765106dbd46ac3b61c72e8db0c, type: 3}
+  - {fileID: 21300000, guid: 6406bae62458c824e9f11ef8dd63f395, type: 3}
+  - {fileID: 21300000, guid: 4440a5f677e48e14f9f682c10bac3dd7, type: 3}
+  - {fileID: 21300000, guid: 0d28159784c3e4643aa26697b5eefe55, type: 3}
+  - {fileID: 21300000, guid: 0a75d7f762abe2f4fa2da1e82ee33571, type: 3}
+  - {fileID: 21300000, guid: b4866c1862aa9d14098e6d777bf9a5ae, type: 3}
+  - {fileID: 21300000, guid: e926859885fe21640bc3b7050221cbf3, type: 3}
+  - {fileID: 21300000, guid: 262cdfd898aefae48878b3e924cdf73d, type: 3}
+  - {fileID: 21300000, guid: 757afbf87df73f649ae9c1ecf52f6363, type: 3}
+  - {fileID: 21300000, guid: ef634c097ad9ec6419b6a3537bab0eef, type: 3}
+  - {fileID: 21300000, guid: fcfa50ab701564c4688e1c39665922eb, type: 3}
+  - {fileID: 21300000, guid: c4d4a4ac668191145b178f048cb77e84, type: 3}
+  - {fileID: 21300000, guid: 3f31e8cc4a7da344dbd557658edb1df7, type: 3}
+  - {fileID: 21300000, guid: 9b04ffbd5b15e9f43bc7035267e2778e, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Tile_Corner_NW
+  - Tile_Full
+  - Tile_Single_S
+  - Tile_Corner_ES
+  - Tile_Single_N
+  - Tile_End_ESW
+  - Tile_Open
+  - Tile_Single_E
+  - Tile_End_NSW
+  - Tile_Straight_NS
+  - Tile_End_NES
+  - Tile_Corner_NE
+  - Tile_Corner_SW
+  - Tile_Single_W
+  - Tile_End_NEW
+  - Tile_Straight_EW
+  m_RenderDataMap: {}
+  m_Tag: Cells
+  m_IsVariant: 0
+  m_IsPlaceholder: 0

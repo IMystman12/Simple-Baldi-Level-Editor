@@ -18,7 +18,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!224 &8306544776576144486
 RectTransform:
@@ -186,9 +186,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   text: {fileID: 8306544776576144480}
   room:
-    name: Room
     color: {r: 0, g: 0, b: 0, a: 0}
+    name: Room
+    mapBGName: Transparent
     cells: []
+    doors: []
 --- !u!61 &7678788899375678397
 BoxCollider2D:
   m_ObjectHideFlags: 0

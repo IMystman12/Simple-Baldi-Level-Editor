@@ -16,7 +16,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &3457791239307058799
 Transform:
@@ -49,7 +49,6 @@ MonoBehaviour:
     position: {x: 0, y: 0}
     rotation: 0
     spriteName: 
-    isBillboard: 0
     color: {r: 1, g: 1, b: 1, a: 1}
   spriteRenderer: {fileID: 5573764959445249183}
 --- !u!58 &3457791239307058797
@@ -83,7 +82,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &296882622043346308
 Transform:
