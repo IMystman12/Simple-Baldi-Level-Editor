@@ -1,4 +1,5 @@
 
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,10 +12,10 @@ public class Categories : Singleton<Categories>
         Cell,
         Icon,
         Door,
-        Generator,
+        Lightmap,
         Options,
         Save,
-        Multiplayer
+        Navigation
     }
     public Category category;
     public Toggle[] toggles = new Toggle[6];
@@ -70,11 +71,9 @@ public class Categories : Singleton<Categories>
                 Toolbar.Instance.Disable(1, true);
                 SpriteSelector.Instance.Open(category);
                 break;
-            case Category.Generator:
-                EditorPad.Instance.editorState.ChangeState(new Editor_Generator());
+            case Category.Lightmap:
+                EditorPad.Instance.editorState.ChangeState(new Editor_Lightmap());
                 Toolbar.Instance.Open();
-                Toolbar.Instance.Disable(0, true);
-                SpriteSelector.Instance.Open(category);
                 break;
             case Category.Options:
                 OptionEditor.Instance.Open();
@@ -84,7 +83,10 @@ public class Categories : Singleton<Categories>
                 SaveEditor.Instance.Open();
                 toggles[(int)Category.Save].isOn = false;
                 break;
-            case Category.Multiplayer:
+            case Category.Navigation:
+                EditorPad.Instance.editorState.ChangeState(new Editor_Navigation());
+                Toolbar.Instance.Open();
+                Toolbar.Instance.Disable(1, true);
                 break;
         }
         Toolbar.Instance.UpdateValue();
@@ -97,20 +99,33 @@ public class Categories : Singleton<Categories>
                 foreach (var b in a)
                 {
                     c = EditorPad.Instance.ec.CellFromPosition(b);
-                    if (!EditorPad.Instance.removal && c == null)
+                    if (!EditorPad.Instance.removal)
                     {
-                        if (SpriteSelector.Instance.selectionIndex == 16)
+                        if (c == null)
                         {
-                            EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room));
-                        }
-                        else
-                        {
-                            EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room, SpriteSelector.Instance.selectionIndex);
+                            if (SpriteSelector.Instance.selectionIndex == 16)
+                            {
+                                EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room));
+                            }
+                            else
+                            {
+                                EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room, SpriteSelector.Instance.selectionIndex);
+                            }
                         }
                     }
                     else if (EditorPad.Instance.removal && c && c.room == RoomEditor.Instance.currentTag.room)
                     {
-                        EditorPad.Instance.ec.DestroyCell(EditorPad.Instance.ec.CellFromPosition(b));
+                        if (c != null)
+                        {
+                            if (SpriteSelector.Instance.selectionIndex > 15)
+                            {
+                                EditorPad.Instance.ec.DestroyCell(c);
+                            }
+                            else if (c.data.id == SpriteSelector.Instance.selectionIndex)
+                            {
+                                EditorPad.Instance.ec.DestroyCell(c);
+                            }
+                        }
                     }
                 }
             };
@@ -137,7 +152,7 @@ public class Categories : Singleton<Categories>
     public class Editor_Door : StateBase
     {
         bool hasPosA;
-        IntVector2 posA;
+        Coordinate posA;
         public override void Enter()
         {
             Toolbar.Instance.tip.text = "Door: Position?";
@@ -153,8 +168,8 @@ public class Categories : Singleton<Categories>
                     else if (Mathf.Abs(posA.x - a[0].x) != Mathf.Abs(posA.z - a[0].z) && (Mathf.Abs(posA.x - a[0].x) == 1 || Mathf.Abs(posA.z - a[0].z) == 1))
                     {
                         Toolbar.Instance.tip.text = "Door: Position?";
-                        Direction direction = Directions.FromPointAToB(posA, a[0]);
-                        if (direction != Direction.Null && EditorPad.Instance.ec.CellFromPosition(posA))
+                        Towards direction = TowardsExtension.FromPointAToB(posA, a[0]);
+                        if (direction != Towards.NaD && EditorPad.Instance.ec.CellFromPosition(posA))
                         {
                             if (EditorPad.Instance.removal)
                             {
@@ -177,14 +192,72 @@ public class Categories : Singleton<Categories>
             EditorPad.Instance.tool.subscribe = null;
         }
     }
-    public class Editor_Generator : StateBase
+    public class Editor_Lightmap : StateBase
     {
-        public override void Enter() => EditorPad.Instance.tool.subscribe = (a) =>
+        public override void Enter()
+        {
+            LightmapEditor.Instance.StartRender();
+            EditorPad.Instance.tool.subscribe = (a) =>
             {
-                foreach (var b in a)
+                if (EditorPad.Instance.removal)
                 {
+                    foreach (var b in a)
+                    {
+                        LightmapEditor.Instance.DestroyLight(b);
+                    }
+                }
+                else
+                {
+                    foreach (var b in a)
+                    {
+                        LightmapEditor.Instance.CreateLight(b);
+                    }
                 }
             };
-        public override void Exit() => EditorPad.Instance.tool.subscribe = null;
+        }
+        public override void Exit()
+        {
+            Toolbar.Tool_Painter.clickMode = false;
+            EditorPad.Instance.tool.subscribe = null;
+            LightmapEditor.Instance.StopRender();
+        }
+    }
+    public class Editor_Navigation : StateBase
+    {
+        bool startDetected;
+        Coordinate startCoordinate;
+        public override void Enter()
+        {
+            Toolbar.Instance.tip.text = "Path: Start?";
+            NavigationGuides.Instance.Show(true);
+            Toolbar.Tool_Painter.clickMode = true;
+            EditorPad.Instance.tool.subscribe = (a) =>
+            {
+                if (!startDetected)
+                {
+                    Toolbar.Instance.tip.text = "Path: End?";
+                    startCoordinate = a[0];
+                    startDetected = true;
+                    return;
+                }
+                if (EditorPad.Instance.removal)
+                {
+                    NavigationGuides.Instance.RemovePath(startCoordinate, a[0]);
+                }
+                else
+                {
+                    NavigationGuides.Instance.MakePath(startCoordinate, a[0]);
+                }
+                Toolbar.Instance.tip.text = "Path: Start?";
+                startDetected = false;
+            };
+        }
+        public override void Exit()
+        {
+            Toolbar.Tool_Painter.clickMode = false;
+            EditorPad.Instance.tool.subscribe = null;
+            Toolbar.Instance.tip.text = "";
+            NavigationGuides.Instance.Show(false);
+        }
     }
 }

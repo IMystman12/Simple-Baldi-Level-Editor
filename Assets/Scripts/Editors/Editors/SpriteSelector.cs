@@ -51,6 +51,7 @@ public class SpriteSelector : Singleton<SpriteSelector>
     public void Open(Categories.Category category)
     {
         gameObject.SetActive(true);
+
         switch (category)
         {
             case Categories.Category.Room:
@@ -65,10 +66,11 @@ public class SpriteSelector : Singleton<SpriteSelector>
             case Categories.Category.Door:
                 sprites = doors;
                 break;
-            case Categories.Category.Generator:
-                sprites = generators;
+            case Categories.Category.Navigation:
+                sprites = navigation;
                 break;
         }
+
         for (int i = 0; i < toggles.Count; i++)
         {
             Destroy(toggles[i].gameObject);
@@ -96,5 +98,5 @@ public class SpriteSelector : Singleton<SpriteSelector>
     public Sprite[] cells = new Sprite[17];
     public Sprite[] icons = new Sprite[17];
     public Sprite[] doors = new Sprite[17];
-    public Sprite[] generators = new Sprite[2];
+    public Sprite[] navigation = new Sprite[15];
 }

@@ -32,13 +32,11 @@ public class SaveEditor : Singleton<SaveEditor>
 
     public Camera mapRender => OptionEditor.Instance.mapRender;
     public RenderTexture mapTex => OptionEditor.Instance.mapTex;
-    string mapTexturePath => Path.Combine(Application.persistentDataPath, levelName + ".png");
+    string mapTexturePath => Path.Combine(Application.persistentDataPath, $"Map_{levelName}.png");
+    string lightmapTexturePath => Path.Combine(Application.persistentDataPath, $"Lightmap_{levelName}.png");
     string mapAssetPath => Path.Combine(Application.persistentDataPath, levelName + ".mapAsset");
-    public void SaveMap()
+    public void SaveMapAndLightmap()
     {
-        var flag = OptionEditor.Instance.guide.activeSelf;
-        OptionEditor.Instance.guide.SetActive(false);
-
         Shader.DisableKeyword("_BG_REQUIRED");
 
         mapRender.enabled = true;
@@ -52,9 +50,10 @@ public class SaveEditor : Singleton<SaveEditor>
         tex.filterMode = FilterMode.Point;
         Shader.EnableKeyword("_BG_REQUIRED");
 
-        OptionEditor.Instance.guide.SetActive(flag);
-
         File.WriteAllBytes(mapTexturePath, tex.EncodeToPNG());
+
+        File.WriteAllBytes(lightmapTexturePath, EditorPad.Instance.ec.lightmap.EncodeToPNG());
+
         Application.OpenURL(Application.persistentDataPath);
     }
     public void SaveAsset()
@@ -70,6 +69,13 @@ public class SaveEditor : Singleton<SaveEditor>
         {
             Debug.Log($"{levelName} was founded! Loading");
             EditorPad.Instance.ec.Build(JsonUtility.FromJson<LevelAsset>(File.ReadAllText(mapAssetPath)));
+            RoomEditor.Instance.UpdateTags();
+            RoomEditor.Instance.Open(RoomEditor.Instance.tags[0]);
         }
+        else
+        {
+            RoomEditor.Instance.CreateRoom();
+        }
+        Close();
     }
 }

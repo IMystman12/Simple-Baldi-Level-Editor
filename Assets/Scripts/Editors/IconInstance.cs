@@ -1,7 +1,7 @@
 using System.Linq;
 using UnityEngine;
 
-public class IconTag : MonoBehaviour, IClickable
+public class IconInstance : MonoBehaviour, IClickable
 {
     public Icon icon;
     public SpriteRenderer spriteRenderer;

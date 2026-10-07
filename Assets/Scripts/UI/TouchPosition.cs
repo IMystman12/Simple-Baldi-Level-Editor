@@ -1,20 +1,24 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class TouchPosition : MonoBehaviour, IPointerEnterHandler, IPointerUpHandler
+public class TouchPosition : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-    public bool activated;
-    public int id;
+    bool activated;
+    int id;
     public static Vector3 point;
     private void Start()
     {
-        if (!Application.isMobilePlatform)
+        if (!Input.touchSupported&&Application.isMobilePlatform)
         {
             Destroy(this);
         }
     }
-    public void OnPointerEnter(PointerEventData eventData)
+    public void OnPointerDown(PointerEventData eventData)
     {
+        if (activated)
+        {
+            return;
+        }
         activated = true;
         id = eventData.pointerId;
         point = eventData.position;

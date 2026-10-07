@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3388785442158046868}
   - component: {fileID: 3388785442158046869}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Square
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -93,7 +93,7 @@ GameObject:
   - component: {fileID: 3388785443016731855}
   - component: {fileID: 3388785443016731854}
   - component: {fileID: -1179565701327347290}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Tile_Full
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -189,5 +189,21 @@ MonoBehaviour:
     position:
       x: 0
       z: 0
+    light:
+      position:
+        x: 0
+        z: 0
+      color: {r: 1, g: 1, b: 1, a: 1}
+      strength: 5
   rendererBase: {fileID: 3388785443016731854}
   rendererBG: {fileID: 3388785442158046869}
+  ec: {fileID: 0}
+  hasLight: 0
+  light:
+    position:
+      x: 0
+      z: 0
+    color: {r: 1, g: 1, b: 1, a: 1}
+    strength: 5
+  cellsWithLight: []
+  cost: 0

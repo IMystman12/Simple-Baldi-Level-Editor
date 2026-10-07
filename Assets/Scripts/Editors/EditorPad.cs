@@ -9,7 +9,7 @@ public class EditorPad : Singleton<EditorPad>
     public void Initialize()
     {
         ec = Instantiate(ecPref);
-        ec.Resize(new IntVector2(64, 64));
+        ec.Resize(new Coordinate(64, 64));
     }
     public void Clear() => Destroy(ec.gameObject);
 
@@ -17,11 +17,11 @@ public class EditorPad : Singleton<EditorPad>
 
     public Toolbar.ToolStateMachine tool = new Toolbar.ToolStateMachine();
     public TMP_Text positionTip;
-    public IntVector2 cursorGridPos;
+    public Coordinate cursorGridPos;
     void GridPositionUpdate()
     {
-        worldPoint = Camera.main.ScreenToWorldPoint(Application.isMobilePlatform ? TouchPosition.point : Input.mousePosition);
-        cursorGridPos = IntVector2.GetGridPosition(worldPoint);
+        worldPoint = Camera.main.ScreenToWorldPoint(Input.touchSupported && Application.isMobilePlatform ? TouchPosition.point : Input.mousePosition);
+        cursorGridPos = Coordinate.ConvertToGridCoordinate(worldPoint);
         cursorGridPos.x = Mathf.Clamp(cursorGridPos.x, 0, ec.realSize.x);
         cursorGridPos.z = Mathf.Clamp(cursorGridPos.z, 0, ec.realSize.z);
         positionTip.text = cursorGridPos.ToString();
@@ -32,11 +32,13 @@ public class EditorPad : Singleton<EditorPad>
     public void SetArea(bool val) => inArea = val;
 
     public bool pause { get; private set; }
+    int pauses;
     public Categories categories;
     public void Pause(bool val)
     {
-        pause = val;
-        controls.SetActive(!val && Application.isMobilePlatform);
+        pauses += val ? 1 : -1;
+        pause = pauses > 0;
+        controls.SetActive(!val && Input.touchSupported && Application.isMobilePlatform);
         clkPrevious?.OffHighlight();
         categories?.Pause(val);
     }
@@ -55,10 +57,11 @@ public class EditorPad : Singleton<EditorPad>
     Vector3 worldPoint;
     void CameraUpdate()
     {
-        val = Time.fixedDeltaTime;
+        val = Time.fixedDeltaTime * 10;
         pos.x = Mathf.Clamp(pos.x + Priority(Input.GetAxis("Horizontal"), movementX * mobileMovement) * val, 0, ec.realSize.x);
         pos.y = Mathf.Clamp(pos.y + Priority(Input.GetAxis("Vertical"), movementY * mobileMovement) * val, 0, ec.realSize.z);
         Camera.main.transform.position = new Vector3(pos.x, pos.y, Mathf.Round(transform.position.z));
+        bg.position = new Vector3(Mathf.Floor(pos.x / 10) * 10 - 0.5f, Mathf.Floor(pos.y / 10) * 10 - 0.5f, 10);
         Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + Priority(Input.GetAxis("Mouse ScrollWheel"), zoom * mobileZoom) * scaleSensitivity, 0.1f, 64);
     }
     float Priority(float a, float b) => Mathf.Abs(b) > Mathf.Abs(a) ? b : a;
@@ -86,11 +89,11 @@ public class EditorPad : Singleton<EditorPad>
         }
     }
 
-    public IconTag iconPref;
-    public List<IconTag> icons = new List<IconTag>();
-    public IconTag CreateIcon(IntVector2 pos, Sprite sprite)
+    public IconInstance iconPref;
+    public List<IconInstance> icons = new List<IconInstance>();
+    public IconInstance CreateIcon(Coordinate pos, Sprite sprite)
     {
-        var ico = Instantiate(iconPref, IntVector2.ToVector2(pos), Quaternion.identity, ec.transform);
+        var ico = Instantiate(iconPref, Coordinate.ConvertToMapCoordinate(pos), Quaternion.identity, ec.transform);
         ico.spriteRenderer.sprite = sprite;
         ico.icon.spriteName = sprite ? sprite.name : "Icon_Item";
         ico.UpdateFromData();
@@ -98,13 +101,13 @@ public class EditorPad : Singleton<EditorPad>
         icons.Add(ico);
         return ico;
     }
-    public void DestroyIcon(IntVector2 pos)
+    public void DestroyIcon(Coordinate pos)
     {
-        IconTag tag;
+        IconInstance tag;
         for (int i = 0; i < icons.Count;)
         {
             tag = icons[i];
-            if (IntVector2.GetGridPosition(tag.transform.position) == pos)
+            if (Coordinate.ConvertToGridCoordinate(tag.transform.position) == pos)
             {
                 DestroyIcon(tag);
             }
@@ -114,7 +117,7 @@ public class EditorPad : Singleton<EditorPad>
             }
         }
     }
-    void DestroyIcon(IconTag icon)
+    void DestroyIcon(IconInstance icon)
     {
         ec.icons.Remove(icon.icon);
         icons.Remove(icon);
@@ -128,11 +131,13 @@ public class EditorPad : Singleton<EditorPad>
         }
     }
 
+    public Transform bg, cursorCross;
+    void GuideUpdate() => cursorCross.position = (Vector3)Coordinate.ConvertToMapCoordinate(cursorGridPos) + Vector3.forward * 5;
     private void Start()
     {
         Initialize();
-        Shader.EnableKeyword("_BG_REQUIRED");
         RoomEditor.Instance.CreateRoom();
+        Shader.EnableKeyword("_BG_REQUIRED");
         tool.subscribe += (a) => Debug.Log($"Points Received: {string.Join(",,", a)}");
     }
 
@@ -145,9 +150,13 @@ public class EditorPad : Singleton<EditorPad>
 
         if (!pause)
         {
-            GridPositionUpdate();
+            if (inArea)
+            {
+                GridPositionUpdate();
+                GuideUpdate();
+                ClickUpdate();
+            }
             CameraUpdate();
-            ClickUpdate();
         }
     }
 }

@@ -16,7 +16,8 @@ public class RoomEditor : Singleton<RoomEditor>
         tags.ForEach(a => a.OffHighlight());
         nameField.text = currentTag.room.name;
         ApplyName();
-        ShowColor();
+        colorField.color = currentTag.room.color;
+        colorField.ShowColor();
 
         destroyButton.gameObject.SetActive(EditorPad.Instance.ec.rooms.Count > 1);
         EditorPad.Instance.Pause(true);
@@ -32,7 +33,6 @@ public class RoomEditor : Singleton<RoomEditor>
     }
     public void Close()
     {
-        destroyButton.gameObject.SetActive(EditorPad.Instance.ec.rooms.Count > 1);
         SpriteSelector.Instance.Close();
         gameObject.SetActive(false);
         EditorPad.Instance.Pause(false);
@@ -102,31 +102,11 @@ public class RoomEditor : Singleton<RoomEditor>
         nameField.text = currentTag.room.name;
     }
 
-    public TMP_InputField colorField;
-    public void TryApplyColor()
+
+    public ColorField colorField;
+    public void ColorUpdate()
     {
-        string[] array = colorField.text.Split(',');
-        if (array.Length < 3)
-        {
-            ShowColor();
-            return;
-        }
-        int val;
-        Color result = Color.white;
-        for (int i = 0; i < 3; i++)
-        {
-            if (int.TryParse(array[i], out val) && val < 256)
-            {
-                result[i] = val / 255;
-            }
-            else
-            {
-                ShowColor();
-                return;
-            }
-        }
-        currentTag.room.color = result;
+        currentTag.room.color = colorField.color;
         currentTag.room.ChangeColor(EditorPad.Instance.ec);
     }
-    void ShowColor() => colorField.text = string.Join(",", currentTag.room.color.r * 255, currentTag.room.color.g * 255, currentTag.room.color.b * 255);
 }

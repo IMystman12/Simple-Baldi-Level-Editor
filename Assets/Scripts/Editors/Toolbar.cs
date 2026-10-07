@@ -14,7 +14,7 @@ public class Toolbar : Singleton<Toolbar>
     }
     public class ToolStateMachine : StateMachine<Tool_StateBase>
     {
-        public Action<IntVector2[]> subscribe;
+        public Action<Coordinate[]> subscribe;
         public override void ChangeState(Tool_StateBase newState)
         {
             base.ChangeState(newState);
@@ -27,15 +27,15 @@ public class Toolbar : Singleton<Toolbar>
     public class Tool_StateBase : StateBase
     {
         protected bool fitForBuild => EditorPad.Instance.inArea && EditorPad.Instance.ec.ContainsCoordinates(EditorPad.Instance.cursorGridPos);
-        public Action<IntVector2[]> subscribe;
-        protected void ReceivePosition(params IntVector2[] positions) => subscribe?.Invoke(positions);
+        public Action<Coordinate[]> subscribe;
+        protected void ReceivePosition(params Coordinate[] positions) => subscribe?.Invoke(positions);
         public virtual void ForceReset()
         { }
     }
     public class Tool_Painter : Tool_StateBase
     {
         public static bool clickMode;
-        IntVector2 pos = IntVector2.one * -1;
+        Coordinate pos = Coordinate.one * -1;
         public override void Update()
         {
             if (fitForBuild && (clickMode ? EditorPad.SubmitDelayed : EditorPad.Submit) && pos != EditorPad.Instance.cursorGridPos)
@@ -44,12 +44,12 @@ public class Toolbar : Singleton<Toolbar>
                 ReceivePosition(pos);
             }
         }
-        public override void ForceReset() => pos = IntVector2.one * -1;
+        public override void ForceReset() => pos = Coordinate.one * -1;
     }
     public class Tool_Area : Tool_StateBase
     {
         public bool first = true;
-        public IntVector2 posA, gridPos;
+        public Coordinate posA, gridPos;
         string _string;
         public override void Enter() => Instance.tip.text = string.Empty;
         public override void Update()
@@ -69,12 +69,12 @@ public class Toolbar : Singleton<Toolbar>
                     else
                     {
                         var posB = gridPos;
-                        List<IntVector2> positions = new List<IntVector2>();
+                        List<Coordinate> positions = new List<Coordinate>();
                         for (int j = Mathf.Min(posA.z, posB.z), j0 = Mathf.Max(posA.z, posB.z); j <= j0; j++)
                         {
                             for (int i = Mathf.Min(posA.x, posB.x), i0 = Mathf.Max(posA.x, posB.x); i <= i0; i++)
                             {
-                                positions.Add(new IntVector2(i, j));
+                                positions.Add(new Coordinate(i, j));
                             }
                         }
                         ReceivePosition(positions.ToArray());

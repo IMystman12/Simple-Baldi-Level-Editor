@@ -3,11 +3,14 @@ using UnityEngine;
 
 public class IconEditor : Singleton<IconEditor>
 {
-    public IconTag currentTag;
-    public void Open(IconTag icon)
+    public IconInstance currentTag;
+    public void Open(IconInstance icon)
     {
         currentTag = icon;
-        ShowColor();
+
+        colorField.color = currentTag.icon.color;
+        colorField.ShowColor();
+
         ShowPosition();
         ShowRotation();
         EditorPad.Instance.Pause(true);
@@ -59,31 +62,10 @@ public class IconEditor : Singleton<IconEditor>
     }
     public void ShowRotation() => rotationField.text = currentTag.icon.rotation.ToString();
 
-    public TMP_InputField colorField;
-    public void TryApplyColor()
+    public ColorField colorField;
+    public void ColorUpdate()
     {
-        string[] array = colorField.text.Split(',');
-        if (array.Length < 4)
-        {
-            ShowColor();
-            return;
-        }
-        int val;
-        Color result = Color.white;
-        for (int i = 0; i < 4; i++)
-        {
-            if (int.TryParse(array[i], out val) && val < 256)
-            {
-                result[i] = val / 255;
-            }
-            else
-            {
-                ShowColor();
-                return;
-            }
-        }
-        currentTag.icon.color = result;
+        currentTag.icon.color = colorField.color;
         currentTag.UpdateFromData();
     }
-    void ShowColor() => colorField.text = string.Join(",", currentTag.icon.color.r * 255, currentTag.icon.color.g * 255, currentTag.icon.color.b * 255, currentTag.icon.color.a * 255);
 }

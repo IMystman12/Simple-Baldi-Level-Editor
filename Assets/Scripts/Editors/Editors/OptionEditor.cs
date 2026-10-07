@@ -25,7 +25,7 @@ public class OptionEditor : Singleton<OptionEditor>
             return;
         }
         int val;
-        IntVector2 result = default;
+        Coordinate result = default;
         for (int i = 0; i < 2; i++)
         {
             if (int.TryParse(array[i], out val))
@@ -44,7 +44,7 @@ public class OptionEditor : Singleton<OptionEditor>
 
     public RenderTexture mapTex;
     public Camera mapRender;
-    public void UpdateSize(IntVector2 newSize)
+    public void UpdateSize(Coordinate newSize)
     {
         mapTex.Release();
         mapTex.width = newSize.x * 16;
