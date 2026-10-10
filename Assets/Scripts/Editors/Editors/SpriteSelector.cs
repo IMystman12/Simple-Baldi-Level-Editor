@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -13,6 +14,80 @@ public class SpriteSelector : Singleton<SpriteSelector>
     public List<Toggle> toggles = new List<Toggle>();
     public int page, togglePerPage = 15, selectionIndex, maxPage;
     const float padding = 32 + 5;
+    const string folderName = "Sprite";
+    public void OpenFolder() => Application.OpenURL(Path.Combine(Application.persistentDataPath, folderName));
+    public void CheckSpriteFolder()
+    {
+        string s = Path.Combine(Application.persistentDataPath, folderName), s0;
+        if (!Directory.Exists(s))
+        {
+            Directory.CreateDirectory(s);
+        }
+        Categories.Category[] folders = new Categories.Category[]
+     {
+            Categories.Category.Room,
+            Categories.Category.Icon,
+            Categories.Category.Door
+     };
+        for (int i = 0; i < folders.Length; i++)
+        {
+            s0 = Path.Combine(s, folders[i].ToString());
+            if (!Directory.Exists(s0))
+            {
+                Directory.CreateDirectory(s0);
+                continue;
+            }
+            foreach (var a in Directory.GetFiles(s0, "*", SearchOption.AllDirectories))
+            {
+                ImportSpriteFromPath(a, folders[i]);
+            }
+        }
+    }
+    //skill issue + hard to maintain!
+    public void ImportExtraSprite(ExtraSprite extraSprite)
+    {
+        if (extraSprites.Any(a => a.name == extraSprite.name))
+        {
+            return;
+        }
+        string s = Path.Combine(Application.persistentDataPath, folderName, extraSprite.category.ToString(), $"{extraSprite.name}.png");
+        File.WriteAllBytes(s, extraSprite.bytes);
+        ImportSpriteFromPath(s, extraSprite.category);
+    }
+    void ImportSpriteFromPath(string a, Categories.Category category)
+    {
+        var nam = Path.GetFileNameWithoutExtension(a);
+        if (string.IsNullOrWhiteSpace(nam))
+        {
+            return;
+        }
+        var tex = new Texture2D(1, 1, TextureFormat.RGBA32, false)
+        {
+            filterMode = FilterMode.Point,
+            wrapMode = TextureWrapMode.Repeat
+        };
+        if (tex.LoadImage(File.ReadAllBytes(a)))
+        {
+            var spr = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.one * 0.5f, category != Categories.Category.Room ? Mathf.Min(tex.width, tex.height) : 1);
+            spr.name = nam;
+            extraSprites.Add(spr);
+            switch (category)
+            {
+                case Categories.Category.Room:
+                    rooms.Add(spr);
+                    break;
+                case Categories.Category.Icon:
+                    icons.Add(spr);
+                    break;
+                case Categories.Category.Door:
+                    doors.Add(spr);
+                    break;
+            }
+            return;
+        }
+        Destroy(tex);
+    }
+    public bool GetExtraSprite(string nam, out Sprite sprite) => (sprite = extraSprites.FirstOrDefault(a => a.name == nam)) != null;
     public void MovePage(int dir)
     {
         page += dir;
@@ -55,19 +130,16 @@ public class SpriteSelector : Singleton<SpriteSelector>
         switch (category)
         {
             case Categories.Category.Room:
-                sprites = rooms;
+                sprites = rooms.ToArray();
                 break;
             case Categories.Category.Cell:
                 sprites = cells;
                 break;
             case Categories.Category.Icon:
-                sprites = icons;
+                sprites = icons.ToArray();
                 break;
             case Categories.Category.Door:
-                sprites = doors;
-                break;
-            case Categories.Category.Navigation:
-                sprites = navigation;
+                sprites = doors.ToArray();
                 break;
         }
 
@@ -94,9 +166,9 @@ public class SpriteSelector : Singleton<SpriteSelector>
         gameObject.SetActive(false);
     }
 
-    public Sprite[] rooms = new Sprite[8];
+    public List<Sprite> rooms = new List<Sprite>();
     public Sprite[] cells = new Sprite[17];
-    public Sprite[] icons = new Sprite[17];
-    public Sprite[] doors = new Sprite[17];
-    public Sprite[] navigation = new Sprite[15];
+    public List<Sprite> icons = new List<Sprite>();
+    public List<Sprite> doors = new List<Sprite>();
+    public List<Sprite> extraSprites = new List<Sprite>();
 }

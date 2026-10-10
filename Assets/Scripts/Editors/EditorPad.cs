@@ -135,6 +135,7 @@ public class EditorPad : Singleton<EditorPad>
     void GuideUpdate() => cursorCross.position = (Vector3)Coordinate.ConvertToMapCoordinate(cursorGridPos) + Vector3.forward * 5;
     private void Start()
     {
+        SpriteSelector.Instance.CheckSpriteFolder();
         Initialize();
         RoomEditor.Instance.CreateRoom();
         Shader.EnableKeyword("_BG_REQUIRED");

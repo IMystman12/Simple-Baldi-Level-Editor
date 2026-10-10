@@ -12,8 +12,60 @@ public class EnvironmentController : MonoBehaviour
         size = size,
         rooms = rooms.ToArray(),
         icons = icons.ToArray(),
-        lights = lights.ToArray()
+        lights = lights.ToArray(),
+        extraSprites = CollectExtraSprites()
     };
+
+    ExtraSprite[] CollectExtraSprites()
+    {
+        var lookup = new HashSet<(Categories.Category, string)>();
+        List<ExtraSprite> extraSprites = new List<ExtraSprite>();
+        string n;
+        Sprite sprite;
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            n = rooms[i].mapBGName;
+            if (lookup.Add((Categories.Category.Room, n)) && SpriteSelector.Instance.GetExtraSprite(n, out sprite))
+            {
+                extraSprites.Add(new ExtraSprite()
+                {
+                    category = Categories.Category.Room,
+                    name = n,
+                    bytes = sprite.texture.EncodeToPNG()
+                });
+            }
+
+            for (int j = 0; j < rooms[i].doors.Count; j++)
+            {
+                n = rooms[i].doors[j].spriteName;
+                if (lookup.Add((Categories.Category.Door, n)) && SpriteSelector.Instance.GetExtraSprite(n, out sprite))
+                {
+                    extraSprites.Add(new ExtraSprite()
+                    {
+                        category = Categories.Category.Door,
+                        name = n,
+                        bytes = sprite.texture.EncodeToPNG()
+                    });
+                }
+            }
+        }
+
+        for (int i = 0; i < icons.Count; i++)
+        {
+            n = icons[i].spriteName;
+            if (lookup.Add((Categories.Category.Icon, n)) && SpriteSelector.Instance.GetExtraSprite(n, out sprite))
+            {
+                extraSprites.Add(new ExtraSprite()
+                {
+                    category = Categories.Category.Icon,
+                    name = n,
+                    bytes = sprite.texture.EncodeToPNG()
+                });
+            }
+        }
+
+        return extraSprites.ToArray();
+    }
 
     public void Build(LevelAsset asset)
     {
@@ -467,6 +519,14 @@ public class LevelAsset
     public Room[] rooms = new Room[0];
     public Icon[] icons = new Icon[0];
     public Light[] lights = new Light[0];
+    public ExtraSprite[] extraSprites = new ExtraSprite[0];
+}
+[Serializable]
+public class ExtraSprite
+{
+    public Categories.Category category;
+    public string name;
+    public byte[] bytes;
 }
 [Serializable]
 public class Icon

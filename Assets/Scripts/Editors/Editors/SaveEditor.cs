@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEngine;
@@ -10,7 +12,7 @@ public class SaveEditor : Singleton<SaveEditor>
         gameObject.SetActive(true);
         if (string.IsNullOrWhiteSpace(levelName))
         {
-            levelName = $"Level_{System.DateTime.Now.ToBinary()}";
+            levelName = $"Level_{DateTime.Now.ToBinary()}";
         }
         nameField.text = levelName;
     }
@@ -61,6 +63,7 @@ public class SaveEditor : Singleton<SaveEditor>
         File.WriteAllText(mapAssetPath, JsonUtility.ToJson(EditorPad.Instance.ec.ConvertToAsset, true));
         Application.OpenURL(Application.persistentDataPath);
     }
+
     public void LoadAsset()
     {
         EditorPad.Instance.Clear();
@@ -68,7 +71,17 @@ public class SaveEditor : Singleton<SaveEditor>
         if (File.Exists(mapAssetPath))
         {
             Debug.Log($"{levelName} was founded! Loading");
-            EditorPad.Instance.ec.Build(JsonUtility.FromJson<LevelAsset>(File.ReadAllText(mapAssetPath)));
+            var data = JsonUtility.FromJson<LevelAsset>(File.ReadAllText(mapAssetPath));
+
+            if (SpriteSelector.Instance)
+            {
+                for (int i = 0; i < data.extraSprites.Length; i++)
+                {
+                    SpriteSelector.Instance.ImportExtraSprite(data.extraSprites[i]);
+                }
+            }
+
+            EditorPad.Instance.ec.Build(data);
             RoomEditor.Instance.UpdateTags();
             RoomEditor.Instance.Open(RoomEditor.Instance.tags[0]);
         }
