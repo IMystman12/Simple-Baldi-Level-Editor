@@ -96,6 +96,10 @@ public class LightmapEditor : Singleton<LightmapEditor>
         var lightmap = EditorPad.Instance.ec.lightmap;
         lightmapRenderer.sprite = Sprite.Create(lightmap, new Rect(0, 0, lightmap.width, lightmap.height), Vector2.zero, 1);
         lightmapRenderer.enabled = true;
+        foreach (var a in lights)
+        {
+            a.gameObject.SetActive(true);
+        }
     }
     public void CreateLight(Coordinate position)
     {
@@ -124,6 +128,10 @@ public class LightmapEditor : Singleton<LightmapEditor>
     }
     public void StopRender()
     {
+        foreach (var a in lights)
+        {
+            a.gameObject.SetActive(false);
+        }
         lightmapRenderer.enabled = false;
     }
 }

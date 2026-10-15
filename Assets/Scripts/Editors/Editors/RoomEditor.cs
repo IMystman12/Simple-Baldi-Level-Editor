@@ -39,7 +39,10 @@ public class RoomEditor : Singleton<RoomEditor>
     }
     public void CreateRoom()
     {
-        gameObject.SetActive(false);
+        if (gameObject.activeSelf)
+        {
+            Close();
+        }
         EditorPad.Instance.ec.CreateRoom(Color.white);
         UpdateTags();
         Open(tags[tags.Count - 1]);

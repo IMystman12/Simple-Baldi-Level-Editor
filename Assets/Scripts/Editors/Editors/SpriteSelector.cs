@@ -1,4 +1,4 @@
-using System;
+
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -106,7 +106,11 @@ public class SpriteSelector : Singleton<SpriteSelector>
         }
         CheckValue();
     }
-
+    public void SetValue(int index)
+    {
+        toggles[index].isOn = true;
+        CheckValue();
+    }
     public void TryToSetValue(string spriteName)
     {
         var toggle = toggles.FirstOrDefault(a => a.image.sprite.name == spriteName);
@@ -141,6 +145,9 @@ public class SpriteSelector : Singleton<SpriteSelector>
             case Categories.Category.Door:
                 sprites = doors.ToArray();
                 break;
+            case Categories.Category.BaldiMan:
+                sprites = new Sprite[characters.Length+2];
+                break;
         }
 
         for (int i = 0; i < toggles.Count; i++)
@@ -152,7 +159,15 @@ public class SpriteSelector : Singleton<SpriteSelector>
         for (int i = 0, i0 = sprites.Length; i < i0; i++)
         {
             t = Instantiate(togglePref, togglePref.transform.parent);
-            t.image.sprite = sprites[i];
+            if (category == Categories.Category.BaldiMan)
+            {
+                t.image.sprite = characterSprite;
+                t.image.color = characters[i];
+            }
+            else
+            {
+                t.image.sprite = sprites[i];
+            }
             t.gameObject.SetActive(true);
             toggles.Add(t);
         }
@@ -171,4 +186,25 @@ public class SpriteSelector : Singleton<SpriteSelector>
     public List<Sprite> icons = new List<Sprite>();
     public List<Sprite> doors = new List<Sprite>();
     public List<Sprite> extraSprites = new List<Sprite>();
+
+    public Sprite characterSprite, notebookSprite, entranceSprite;
+    Color[] characters = new Color[]
+   {
+         //Player
+         Color.white,
+        //Baldi
+        new Color(0,1,0,1),
+        //Mrs Pomp
+         new Color(1f, 0.9499881f, 0f, 1f),
+         //Principal
+          new Color(0f, 0.1176471f, 0.4823529f, 1f),
+          //Crafter
+          Color.white,
+          //Sweep
+          new Color(0f, 0.6226415f, 0.06141377f, 1f),
+         //Prize
+         new Color(0f, 0.8746934f, 1f, 1f),
+         //LookAt
+          new Color(0.2588235f, 0.2705882f, 0.1607843f, 1f)
+   };
 }

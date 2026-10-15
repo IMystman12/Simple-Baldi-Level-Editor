@@ -59,4 +59,11 @@ public class OptionEditor : Singleton<OptionEditor>
 
     public GameObject guide;
     public void ToggleGuide() => guide.SetActive(!guide.activeSelf);
+
+    public void ToggleToSetLight()
+    {
+        var ec = EditorPad.Instance.ec;
+        ec.lightAffected = !ec.lightAffected;
+        ec.UpdateLights();
+    }
 }

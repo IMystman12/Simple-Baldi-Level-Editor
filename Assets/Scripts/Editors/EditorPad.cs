@@ -32,7 +32,7 @@ public class EditorPad : Singleton<EditorPad>
     public void SetArea(bool val) => inArea = val;
 
     public bool pause { get; private set; }
-    int pauses;
+    public int pauses;
     public Categories categories;
     public void Pause(bool val)
     {

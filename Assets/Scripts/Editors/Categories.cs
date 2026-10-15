@@ -15,7 +15,7 @@ public class Categories : Singleton<Categories>
         Lightmap,
         Options,
         Save,
-        Navigation
+        BaldiMan
     }
     public Category category;
     public Toggle[] toggles = new Toggle[6];
@@ -56,24 +56,25 @@ public class Categories : Singleton<Categories>
                 Reset();
                 break;
             case Category.Cell:
-                EditorPad.Instance.editorState.ChangeState(new Editor_Cell());
                 Toolbar.Instance.Open();
                 SpriteSelector.Instance.Open(category);
+                SpriteSelector.Instance.SetValue(16);
+                EditorPad.Instance.editorState.ChangeState(new Editor_Cell());
                 break;
             case Category.Icon:
-                EditorPad.Instance.editorState.ChangeState(new Editor_Icon());
                 Toolbar.Instance.Open();
                 SpriteSelector.Instance.Open(category);
+                EditorPad.Instance.editorState.ChangeState(new Editor_Icon());
                 break;
             case Category.Door:
-                EditorPad.Instance.editorState.ChangeState(new Editor_Door());
                 Toolbar.Instance.Open();
                 Toolbar.Instance.Disable(1, true);
                 SpriteSelector.Instance.Open(category);
+                EditorPad.Instance.editorState.ChangeState(new Editor_Door());
                 break;
             case Category.Lightmap:
-                EditorPad.Instance.editorState.ChangeState(new Editor_Lightmap());
                 Toolbar.Instance.Open();
+                EditorPad.Instance.editorState.ChangeState(new Editor_Lightmap());
                 break;
             case Category.Options:
                 OptionEditor.Instance.Open();
@@ -83,10 +84,11 @@ public class Categories : Singleton<Categories>
                 SaveEditor.Instance.Open();
                 toggles[(int)Category.Save].isOn = false;
                 break;
-            case Category.Navigation:
-                EditorPad.Instance.editorState.ChangeState(new Editor_Navigation());
+            case Category.BaldiMan:
                 Toolbar.Instance.Open();
-                Toolbar.Instance.Disable(1, true);
+                SpriteSelector.Instance.Open(category);
+                SpriteSelector.Instance.SetValue(0);
+                EditorPad.Instance.editorState.ChangeState(new Editor_BaldiMan());
                 break;
         }
         Toolbar.Instance.UpdateValue();
@@ -95,40 +97,43 @@ public class Categories : Singleton<Categories>
     {
         CellInstance c;
         public override void Enter() => EditorPad.Instance.tool.subscribe = (a) =>
-            {
-                foreach (var b in a)
-                {
-                    c = EditorPad.Instance.ec.CellFromPosition(b);
-                    if (!EditorPad.Instance.removal)
-                    {
-                        if (c == null)
-                        {
-                            if (SpriteSelector.Instance.selectionIndex == 16)
-                            {
-                                EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room));
-                            }
-                            else
-                            {
-                                EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room, SpriteSelector.Instance.selectionIndex);
-                            }
-                        }
-                    }
-                    else if (EditorPad.Instance.removal && c && c.room == RoomEditor.Instance.currentTag.room)
-                    {
-                        if (c != null)
-                        {
-                            if (SpriteSelector.Instance.selectionIndex > 15)
-                            {
-                                EditorPad.Instance.ec.DestroyCell(c);
-                            }
-                            else if (c.data.id == SpriteSelector.Instance.selectionIndex)
-                            {
-                                EditorPad.Instance.ec.DestroyCell(c);
-                            }
-                        }
-                    }
-                }
-            };
+               {
+                   foreach (var b in a)
+                   {
+                       c = EditorPad.Instance.ec.CellFromPosition(b);
+                       if (!EditorPad.Instance.removal)
+                       {
+                           if (c == null)
+                           {
+                               if (SpriteSelector.Instance.selectionIndex < 17)
+                               {
+                                   if (SpriteSelector.Instance.selectionIndex == 16)
+                                   {
+                                       EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room));
+                                   }
+                                   else
+                                   {
+                                       EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room, SpriteSelector.Instance.selectionIndex);
+                                   }
+                               }
+                           }
+                       }
+                       else if (EditorPad.Instance.removal && c && c.room == RoomEditor.Instance.currentTag.room)
+                       {
+                           if (c != null)
+                           {
+                               if (SpriteSelector.Instance.selectionIndex > 15)
+                               {
+                                   EditorPad.Instance.ec.DestroyCell(c);
+                               }
+                               else if (c.data.id == SpriteSelector.Instance.selectionIndex)
+                               {
+                                   EditorPad.Instance.ec.DestroyCell(c);
+                               }
+                           }
+                       }
+                   }
+               };
         public override void Exit() => EditorPad.Instance.tool.subscribe = null;
     }
     public class Editor_Icon : StateBase
@@ -217,47 +222,33 @@ public class Categories : Singleton<Categories>
         }
         public override void Exit()
         {
-            Toolbar.Tool_Painter.clickMode = false;
             EditorPad.Instance.tool.subscribe = null;
             LightmapEditor.Instance.StopRender();
         }
     }
-    public class Editor_Navigation : StateBase
+    public class Editor_BaldiMan : StateBase
     {
-        bool startDetected;
-        Coordinate startCoordinate;
         public override void Enter()
         {
-            Toolbar.Instance.tip.text = "Path: Start?";
-            NavigationGuides.Instance.Show(true);
-            Toolbar.Tool_Painter.clickMode = true;
             EditorPad.Instance.tool.subscribe = (a) =>
             {
-                if (!startDetected)
-                {
-                    Toolbar.Instance.tip.text = "Path: End?";
-                    startCoordinate = a[0];
-                    startDetected = true;
-                    return;
-                }
                 if (EditorPad.Instance.removal)
                 {
-                    NavigationGuides.Instance.RemovePath(startCoordinate, a[0]);
+                    foreach (var b in a)
+                    {
+                    }
                 }
                 else
                 {
-                    NavigationGuides.Instance.MakePath(startCoordinate, a[0]);
+                    foreach (var b in a)
+                    {
+                    }
                 }
-                Toolbar.Instance.tip.text = "Path: Start?";
-                startDetected = false;
             };
         }
         public override void Exit()
         {
-            Toolbar.Tool_Painter.clickMode = false;
             EditorPad.Instance.tool.subscribe = null;
-            Toolbar.Instance.tip.text = "";
-            NavigationGuides.Instance.Show(false);
         }
     }
 }

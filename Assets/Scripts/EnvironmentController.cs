@@ -231,7 +231,10 @@ public class EnvironmentController : MonoBehaviour
         }
 
         lightmap.Apply(false, false);
+        MaterialController.lightmap = lightmap;
+        UpdateLights();
     }
+    public Color GetLight(Coordinate coordinate) => lightmap.GetPixel(coordinate.x, coordinate.z);
 
     public DoorInstance doorPref;
     public List<DoorInstance> doors = new List<DoorInstance>();
@@ -304,10 +307,10 @@ public class EnvironmentController : MonoBehaviour
             cellInstance.data.position = position;
             cellInstance.room = room;
             cellInstance.room.cells.Add(cellInstance.data);
-            cellInstance.ChangeColor();
             cellInstance.data.id = id;
             cellInstance.rendererBase.sprite = cellSprites[id];
             cellInstance.ec = this;
+            cellInstance.ChangeColor();
             if (cells.ContainsKey(position))
             {
                 cells[position] = cellInstance;
@@ -469,6 +472,23 @@ public class EnvironmentController : MonoBehaviour
         result.Reverse();
         Debug.Log("Found path success in " + sw.ElapsedMilliseconds + " " + result.Count);
         return result;
+    }
+
+    public bool lightAffected;
+    public void UpdateLights()
+    {
+        if (lightAffected)
+        {
+            Shader.EnableKeyword("_LIGHT_EFFECT");
+        }
+        else
+        {
+            Shader.DisableKeyword("_LIGHT_EFFECT");
+        }
+        foreach (var a in MaterialController.all)
+        {
+            a.UpdateLightmap();
+        }
     }
 }
 

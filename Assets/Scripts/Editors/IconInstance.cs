@@ -5,7 +5,7 @@ public class IconInstance : MonoBehaviour, IClickable
 {
     public Icon icon;
     public SpriteRenderer spriteRenderer;
-    bool available => EditorPad.Instance.tool.state == null && IconEditor.Instance && !IconEditor.Instance.isActiveAndEnabled;
+    bool available => EditorPad.Instance.tool.state == null && EditorPad.Instance.editorState.state != null && EditorPad.Instance.editorState.state.GetType() == typeof(Categories.Editor_Icon) && IconEditor.Instance && !IconEditor.Instance.isActiveAndEnabled;
     private void Awake()
     {
         icon = new Icon()

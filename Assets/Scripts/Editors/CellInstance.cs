@@ -7,7 +7,6 @@ public class CellInstance : MonoBehaviour
     public Room room;
     public Cell data;
     public SpriteRenderer rendererBase, rendererBG;
-    MaterialPropertyBlock materialPropertyBlock;
 
     public int cost;
     public CellInstance parent;
@@ -52,26 +51,23 @@ public class CellInstance : MonoBehaviour
         ec.lightmap.SetPixel(data.position.x, data.position.z, col);
     }
 
+    public MaterialController mc_Base, mc_BG;
     public void ChangeColor()
     {
+        var color = room.color;
         if (rendererBase)
         {
-            rendererBase.color = room.color;
+            mc_Base.OpenModifier();
+            mc_Base.mpb.SetColor("_Color", color);
+            mc_Base.CloseModifier();
         }
 
         if (rendererBG)
         {
-            if (materialPropertyBlock == null)
-            {
-                materialPropertyBlock = new MaterialPropertyBlock();
-            }
-            rendererBG.GetPropertyBlock(materialPropertyBlock);
-            materialPropertyBlock.Clear();
-            rendererBG.SetPropertyBlock(materialPropertyBlock);
+            mc_BG.OpenModifier();
 
-            var color = room.color;
             color.a = 0.25f;
-            materialPropertyBlock.SetColor("_Color", color);
+            mc_BG.mpb.SetColor("_Color", color);
 
 
             if (SpriteSelector.Instance)
@@ -79,11 +75,11 @@ public class CellInstance : MonoBehaviour
                 var sprite = SpriteSelector.Instance.rooms.FirstOrDefault(a => a.name == room.mapBGName);
                 if (sprite)
                 {
-                    materialPropertyBlock.SetTexture("_BgTex", sprite.texture);
+                    mc_BG.mpb.SetTexture("_BgTex", sprite.texture);
                 }
             }
 
-            rendererBG.SetPropertyBlock(materialPropertyBlock);
+            mc_BG.CloseModifier();
         }
     }
 }

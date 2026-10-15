@@ -161,6 +161,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
+    Android: com.IMystman12.BaldiMapEditor
     Standalone: com.IMystman12.Baldi-Map-Editor
   buildNumber:
     Standalone: 0
