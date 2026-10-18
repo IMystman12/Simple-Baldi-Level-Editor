@@ -131,6 +131,14 @@ public class SpriteSelector : Singleton<SpriteSelector>
     {
         gameObject.SetActive(true);
 
+        for (int i = 0; i < toggles.Count; i++)
+        {
+            Destroy(toggles[i].gameObject);
+        }
+        toggles.Clear();
+        Toggle t;
+        bool flag = true;
+
         switch (category)
         {
             case Categories.Category.Room:
@@ -146,31 +154,41 @@ public class SpriteSelector : Singleton<SpriteSelector>
                 sprites = doors.ToArray();
                 break;
             case Categories.Category.BaldiMan:
-                sprites = new Sprite[characters.Length+2];
+                flag = false;
+
+                for (int i = 0; i < 2; i++)
+                {
+                    t = Instantiate(togglePref, togglePref.transform.parent);
+                    t.gameObject.SetActive(true);
+                    toggles.Add(t);
+                }
+                toggles[0].image.sprite = notebookSprite;
+                toggles[1].image.sprite = entranceSprite;
+
+                for (int i = 0; i < characters.Length; i++)
+                {
+                    t = Instantiate(togglePref, togglePref.transform.parent);
+
+                    t.image.sprite = characterSprite;
+                    t.image.color = characters[i];
+
+                    t.gameObject.SetActive(true);
+                    toggles.Add(t);
+                }
                 break;
         }
 
-        for (int i = 0; i < toggles.Count; i++)
+        if (flag)
         {
-            Destroy(toggles[i].gameObject);
-        }
-        toggles.Clear();
-        Toggle t;
-        for (int i = 0, i0 = sprites.Length; i < i0; i++)
-        {
-            t = Instantiate(togglePref, togglePref.transform.parent);
-            if (category == Categories.Category.BaldiMan)
+            for (int i = 0; i < sprites.Length; i++)
             {
-                t.image.sprite = characterSprite;
-                t.image.color = characters[i];
-            }
-            else
-            {
+                t = Instantiate(togglePref, togglePref.transform.parent);
                 t.image.sprite = sprites[i];
+                t.gameObject.SetActive(true);
+                toggles.Add(t);
             }
-            t.gameObject.SetActive(true);
-            toggles.Add(t);
         }
+
         page = 0;
         maxPage = Mathf.CeilToInt((float)toggles.Count / togglePerPage);
         MovePage(0);
@@ -189,7 +207,7 @@ public class SpriteSelector : Singleton<SpriteSelector>
 
     public Sprite characterSprite, notebookSprite, entranceSprite;
     Color[] characters = new Color[]
-   {
+    {
          //Player
          Color.white,
         //Baldi
@@ -206,5 +224,5 @@ public class SpriteSelector : Singleton<SpriteSelector>
          new Color(0f, 0.8746934f, 1f, 1f),
          //LookAt
           new Color(0.2588235f, 0.2705882f, 0.1607843f, 1f)
-   };
+    };
 }

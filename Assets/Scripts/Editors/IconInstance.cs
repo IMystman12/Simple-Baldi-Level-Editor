@@ -5,7 +5,15 @@ public class IconInstance : MonoBehaviour, IClickable
 {
     public Icon icon;
     public SpriteRenderer spriteRenderer;
-    bool available => EditorPad.Instance.tool.state == null && EditorPad.Instance.editorState.state != null && EditorPad.Instance.editorState.state.GetType() == typeof(Categories.Editor_Icon) && IconEditor.Instance && !IconEditor.Instance.isActiveAndEnabled;
+    public IconMode iconMode;
+    public enum IconMode
+    {
+        None,
+        Notebook,
+        Exit
+    }
+    bool available => EditorPad.Instance.tool.state == null && EditorPad.Instance.editorState.state != null && isIcon;
+    bool isIcon => EditorPad.Instance.editorState.state.GetType() == typeof(Categories.Editor_Icon) && IconEditor.Instance && !IconEditor.Instance.isActiveAndEnabled;
     private void Awake()
     {
         icon = new Icon()
@@ -22,7 +30,10 @@ public class IconInstance : MonoBehaviour, IClickable
     {
         if (available)
         {
-            IconEditor.Instance.Open(this);
+            if (isIcon)
+            {
+                IconEditor.Instance.Open(this);
+            }
         }
     }
 

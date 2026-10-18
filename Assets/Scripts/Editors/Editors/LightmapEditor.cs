@@ -109,6 +109,7 @@ public class LightmapEditor : Singleton<LightmapEditor>
             var li = Instantiate(lightPref, Coordinate.ConvertToMapCoordinate(position), Quaternion.identity, EditorPad.Instance.ec.transform);
             li.position = cell.data.position;
             lights.Add(li);
+            li.gameObject.SetActive(lightmapRenderer.enabled);
             EditorPad.Instance.ec.GenerateLight(position, light);
         }
     }

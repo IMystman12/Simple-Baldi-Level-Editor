@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -10,6 +11,7 @@ public class EditorPad : Singleton<EditorPad>
     {
         ec = Instantiate(ecPref);
         ec.Resize(new Coordinate(64, 64));
+        ClearHistory();
     }
     public void Clear() => Destroy(ec.gameObject);
 
@@ -91,31 +93,33 @@ public class EditorPad : Singleton<EditorPad>
 
     public IconInstance iconPref;
     public List<IconInstance> icons = new List<IconInstance>();
-    public IconInstance CreateIcon(Coordinate pos, Sprite sprite)
+    public IconInstance CreateIcon(Coordinate pos, string sprite)
     {
         var ico = Instantiate(iconPref, Coordinate.ConvertToMapCoordinate(pos), Quaternion.identity, ec.transform);
-        ico.spriteRenderer.sprite = sprite;
-        ico.icon.spriteName = sprite ? sprite.name : "Icon_Item";
+        ico.icon.spriteName = sprite ?? "Icon_Item";
         ico.UpdateFromData();
         ec.icons.Add(ico.icon);
         icons.Add(ico);
         return ico;
     }
-    public void DestroyIcon(Coordinate pos)
+    public Icon[] DestroyIcon(Coordinate pos)
     {
         IconInstance tag;
+        List<Icon> result = new List<Icon>();
         for (int i = 0; i < icons.Count;)
         {
             tag = icons[i];
             if (Coordinate.ConvertToGridCoordinate(tag.transform.position) == pos)
             {
                 DestroyIcon(tag);
+                result.Add(tag.icon);
             }
             else
             {
                 i++;
             }
         }
+        return result.ToArray();
     }
     void DestroyIcon(IconInstance icon)
     {
@@ -129,6 +133,45 @@ public class EditorPad : Singleton<EditorPad>
         {
             DestroyIcon(icons[0]);
         }
+    }
+
+    private List<HistoryAction> steps = new List<HistoryAction>();
+    //starts from -1 (non-step)
+    int step = -1;
+    public void Undo()
+    {
+        if (step > -1)
+        {
+            steps[step].Apply(true);
+            step--;
+        }
+    }
+
+    public void Redo()
+    {
+        if (step < (steps.Count - 1))
+        {
+            step++;
+            steps[step].Apply(false);
+        }
+    }
+
+    public void RecordStep(HistoryAction action)
+    {
+        action.Apply(false);
+        int i = steps.Count - 1;
+        if (step < i)
+        {
+            //s=-1 sc=1 s+1=0 c=0+1
+            steps.RemoveRange(step + 1, i - step);
+        }
+        steps.Add(action);
+        step++;
+    }
+    public void ClearHistory()
+    {
+        steps.Clear();
+        step = -1;
     }
 
     public Transform bg, cursorCross;
@@ -170,4 +213,15 @@ public interface IClickable
 public enum EditorActions
 {
 
+}
+public abstract class HistoryAction
+{
+    public bool invert;
+    public void Apply(bool undo)
+    {
+        if (invert != undo) Negative();
+        else Positive();
+    }
+    protected abstract void Positive();
+    protected abstract void Negative();
 }

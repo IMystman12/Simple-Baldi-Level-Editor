@@ -37,16 +37,10 @@ public class RoomEditor : Singleton<RoomEditor>
         gameObject.SetActive(false);
         EditorPad.Instance.Pause(false);
     }
-    public void CreateRoom()
-    {
-        if (gameObject.activeSelf)
-        {
-            Close();
-        }
-        EditorPad.Instance.ec.CreateRoom(Color.white);
-        UpdateTags();
-        Open(tags[tags.Count - 1]);
-    }
+
+    public void CreateRoom() => EditorPad.Instance.RecordStep(new HistoryAction_Room(new Room() { color = Color.white }, false));
+    public void DestroyThis() => EditorPad.Instance.RecordStep(new HistoryAction_Room(currentTag.room, true));
+
     public void UpdateTags()
     {
         var ec = EditorPad.Instance.ec;
@@ -85,14 +79,6 @@ public class RoomEditor : Singleton<RoomEditor>
             tags[i].transform.localPosition = k * i;
         }
     }
-    public void DestroyThis()
-    {
-        EditorPad.Instance.ec.DestroyRoom(currentTag.room);
-        tags.Remove(currentTag);
-        Destroy(currentTag.gameObject);
-        RequeueTags();
-        Close();
-    }
 
     public TMP_InputField nameField;
     public void ApplyName()
@@ -111,5 +97,31 @@ public class RoomEditor : Singleton<RoomEditor>
     {
         currentTag.room.color = colorField.color;
         currentTag.room.ChangeColor(EditorPad.Instance.ec);
+    }
+
+    public class HistoryAction_Room : HistoryAction
+    {
+        Room backup;
+        public HistoryAction_Room(Room room, bool invert)
+        {
+            this.invert = invert;
+            backup = room;
+        }
+        protected override void Positive()
+        {
+            if (Instance.gameObject.activeSelf)
+            {
+                Instance.Close();
+            }
+            backup = EditorPad.Instance.ec.LoadRoom(backup);
+            Instance.UpdateTags();
+            Instance.Open(Instance.tags[Instance.tags.Count - 1]);
+        }
+        protected override void Negative()
+        {
+            EditorPad.Instance.ec.DestroyRoom(backup);
+            Instance.UpdateTags();
+            Instance.Close();
+        }
     }
 }

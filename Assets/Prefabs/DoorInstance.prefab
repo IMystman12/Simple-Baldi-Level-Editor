@@ -51,6 +51,7 @@ MonoBehaviour:
     direction: 0
     spriteName: 
   spriteRenderer: {fileID: 6917071358303051093}
+  mc: {fileID: 115103584183232224}
 --- !u!1 &5199971056716466308
 GameObject:
   m_ObjectHideFlags: 0

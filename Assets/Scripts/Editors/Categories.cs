@@ -1,5 +1,5 @@
 
-using UnityEditor;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -19,9 +19,11 @@ public class Categories : Singleton<Categories>
     }
     public Category category;
     public Toggle[] toggles = new Toggle[6];
+    public Button playButton;
     void Start() => UpdateBool();
     public void Reset()
     {
+        playButton.gameObject.SetActive(false);
         SpriteSelector.Instance.Close();
         Toolbar.Instance.Close();
         EditorPad.Instance.editorState.ChangeState(null);
@@ -85,6 +87,7 @@ public class Categories : Singleton<Categories>
                 toggles[(int)Category.Save].isOn = false;
                 break;
             case Category.BaldiMan:
+                playButton.gameObject.SetActive(true);
                 Toolbar.Instance.Open();
                 SpriteSelector.Instance.Open(category);
                 SpriteSelector.Instance.SetValue(0);
@@ -95,64 +98,96 @@ public class Categories : Singleton<Categories>
     }
     public class Editor_Cell : StateBase
     {
-        CellInstance c;
-        public override void Enter() => EditorPad.Instance.tool.subscribe = (a) =>
-               {
-                   foreach (var b in a)
-                   {
-                       c = EditorPad.Instance.ec.CellFromPosition(b);
-                       if (!EditorPad.Instance.removal)
-                       {
-                           if (c == null)
-                           {
-                               if (SpriteSelector.Instance.selectionIndex < 17)
-                               {
-                                   if (SpriteSelector.Instance.selectionIndex == 16)
-                                   {
-                                       EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room));
-                                   }
-                                   else
-                                   {
-                                       EditorPad.Instance.ec.CreateCell(b, RoomEditor.Instance.currentTag.room, SpriteSelector.Instance.selectionIndex);
-                                   }
-                               }
-                           }
-                       }
-                       else if (EditorPad.Instance.removal && c && c.room == RoomEditor.Instance.currentTag.room)
-                       {
-                           if (c != null)
-                           {
-                               if (SpriteSelector.Instance.selectionIndex > 15)
-                               {
-                                   EditorPad.Instance.ec.DestroyCell(c);
-                               }
-                               else if (c.data.id == SpriteSelector.Instance.selectionIndex)
-                               {
-                                   EditorPad.Instance.ec.DestroyCell(c);
-                               }
-                           }
-                       }
-                   }
-               };
+        public override void Enter() => EditorPad.Instance.tool.subscribe = (a) => EditorPad.Instance.RecordStep(new HistoryAction_Cell(a));
         public override void Exit() => EditorPad.Instance.tool.subscribe = null;
+        public class HistoryAction_Cell : HistoryAction
+        {
+            Room r;
+            int i;
+            CellInstance c;
+            Coordinate[] array;
+            public HistoryAction_Cell(Coordinate[] coordinates)
+            {
+                r = RoomEditor.Instance.currentTag.room;
+                i = SpriteSelector.Instance.selectionIndex;
+                invert = EditorPad.Instance.removal;
+                array = coordinates;
+            }
+            protected override void Positive()
+            {
+                foreach (var b in array)
+                {
+                    c = EditorPad.Instance.ec.CellFromPosition(b);
+                    if (!c)
+                    {
+                        if (i == 16)
+                        {
+                            EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, r));
+                        }
+                        else
+                        {
+                            EditorPad.Instance.ec.CreateCell(b, r, i);
+                        }
+                    }
+                }
+            }
+            protected override void Negative()
+            {
+                foreach (var b in array)
+                {
+                    c = EditorPad.Instance.ec.CellFromPosition(b);
+                    if (c && c.room == r && (i > 15 || c.data.id == i))
+                    {
+                        EditorPad.Instance.ec.DestroyCell(c);
+                    }
+                }
+            }
+        }
     }
     public class Editor_Icon : StateBase
     {
-        public override void Enter() => EditorPad.Instance.tool.subscribe = (a) =>
+        public override void Enter() => EditorPad.Instance.tool.subscribe = (a) => EditorPad.Instance.RecordStep(new HistoryAction_Icon(a));
+        public override void Exit() => EditorPad.Instance.tool.subscribe = null;
+        public class HistoryAction_Icon : HistoryAction
+        {
+            string spriteName;
+            Icon[] icons = new Icon[0];
+            Coordinate[] array;
+            public HistoryAction_Icon(Coordinate[] coordinates)
             {
-                foreach (var b in a)
+                spriteName = SpriteSelector.Instance.Selection.name;
+                invert = EditorPad.Instance.removal;
+                array = coordinates;
+            }
+
+            protected override void Positive()
+            {
+                IconInstance iconI;
+                for (int i = 0; i < array.Length; i++)
                 {
-                    if (EditorPad.Instance.removal)
+                    if (icons.Length == 0)
                     {
-                        EditorPad.Instance.DestroyIcon(b);
+                        EditorPad.Instance.CreateIcon(array[i], spriteName);
                     }
                     else
                     {
-                        EditorPad.Instance.CreateIcon(b, SpriteSelector.Instance.Selection);
+                        iconI = EditorPad.Instance.CreateIcon(default, null);
+                        icons[i].CopyTo(iconI.icon);
+                        iconI.UpdateFromData();
                     }
                 }
-            };
-        public override void Exit() => EditorPad.Instance.tool.subscribe = null;
+            }
+
+            protected override void Negative()
+            {
+                var list = new List<Icon>();
+                for (int i = 0; i < array.Length; i++)
+                {
+                    list.AddRange(EditorPad.Instance.DestroyIcon(array[i]));
+                }
+                icons = list.ToArray();
+            }
+        }
     }
     public class Editor_Door : StateBase
     {
@@ -176,14 +211,7 @@ public class Categories : Singleton<Categories>
                         Towards direction = TowardsExtension.FromPointAToB(posA, a[0]);
                         if (direction != Towards.NaD && EditorPad.Instance.ec.CellFromPosition(posA))
                         {
-                            if (EditorPad.Instance.removal)
-                            {
-                                EditorPad.Instance.ec.DestroyDoor(posA, direction);
-                            }
-                            else
-                            {
-                                EditorPad.Instance.ec.CreateDoor(posA, direction, SpriteSelector.Instance.Selection);
-                            }
+                            EditorPad.Instance.RecordStep(new HistoryAction_Door(posA, direction));
                         }
                         hasPosA = false;
                         EditorPad.Instance.tool.state.ForceReset();
@@ -196,58 +224,100 @@ public class Categories : Singleton<Categories>
             Toolbar.Instance.tip.text = string.Empty;
             EditorPad.Instance.tool.subscribe = null;
         }
+        public class HistoryAction_Door : HistoryAction
+        {
+            Door backup;
+            Coordinate coordinate;
+            Towards towards;
+            string selection;
+            public HistoryAction_Door(Coordinate coordinate, Towards towards)
+            {
+                this.coordinate = coordinate;
+                this.towards = towards;
+                selection = SpriteSelector.Instance.Selection.name;
+                invert = EditorPad.Instance.removal;
+            }
+            protected override void Positive()
+            {
+                if (backup == null)
+                {
+                    backup = EditorPad.Instance.ec.CreateDoor(coordinate, towards, selection).door;
+                }
+                else
+                {
+                    EditorPad.Instance.ec.LoadDoor(backup);
+                }
+            }
+            protected override void Negative() => backup = EditorPad.Instance.ec.DestroyDoor(coordinate, towards);
+        }
     }
     public class Editor_Lightmap : StateBase
     {
         public override void Enter()
         {
             LightmapEditor.Instance.StartRender();
-            EditorPad.Instance.tool.subscribe = (a) =>
-            {
-                if (EditorPad.Instance.removal)
-                {
-                    foreach (var b in a)
-                    {
-                        LightmapEditor.Instance.DestroyLight(b);
-                    }
-                }
-                else
-                {
-                    foreach (var b in a)
-                    {
-                        LightmapEditor.Instance.CreateLight(b);
-                    }
-                }
-            };
+            EditorPad.Instance.tool.subscribe = (a) => EditorPad.Instance.RecordStep(new HistoryAction_Lightmap(a));
         }
         public override void Exit()
         {
             EditorPad.Instance.tool.subscribe = null;
             LightmapEditor.Instance.StopRender();
         }
+        public class HistoryAction_Lightmap : HistoryAction
+        {
+            Coordinate[] array;
+            public HistoryAction_Lightmap(Coordinate[] coordinates)
+            {
+                invert = EditorPad.Instance.removal;
+                array = coordinates;
+            }
+            protected override void Positive()
+            {
+                foreach (var b in array)
+                {
+                    LightmapEditor.Instance.CreateLight(b);
+                }
+            }
+            protected override void Negative()
+            {
+                foreach (var b in array)
+                {
+                    LightmapEditor.Instance.DestroyLight(b);
+                }
+            }
+        }
     }
     public class Editor_BaldiMan : StateBase
     {
         public override void Enter()
         {
+            Toolbar.Tool_Painter.clickMode = true;
             EditorPad.Instance.tool.subscribe = (a) =>
-            {
-                if (EditorPad.Instance.removal)
-                {
-                    foreach (var b in a)
-                    {
-                    }
-                }
-                else
-                {
-                    foreach (var b in a)
-                    {
-                    }
-                }
-            };
+               {
+                   if (SpriteSelector.Instance.selectionIndex > 1)
+                   {
+                       int i = SpriteSelector.Instance.selectionIndex - 2;
+                       if (EditorPad.Instance.removal)
+                       {
+                           foreach (var b in a)
+                           {
+                               BaldiManager.Instance.RemoveEntityFromSpawn(i, b);
+                           }
+                       }
+                       else
+                       {
+                           foreach (var b in a)
+                           {
+                               Debug.Log("abc");
+                               BaldiManager.Instance.AddEntityToSpawn(i, b);
+                           }
+                       }
+                   }
+               };
         }
         public override void Exit()
         {
+            Toolbar.Tool_Painter.clickMode = false;
             EditorPad.Instance.tool.subscribe = null;
         }
     }

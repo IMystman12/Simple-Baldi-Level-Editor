@@ -72,28 +72,9 @@ public class EnvironmentController : MonoBehaviour
         Resize(asset.size);
 
         {
-            Room roomCopied, roomCreated;
-            Cell cellCopied;
-            Door doorCopied;
-            DoorInstance doorCreated;
             for (int i = 0; i < asset.rooms.Length; i++)
             {
-                roomCopied = asset.rooms[i];
-                roomCreated = CreateRoom(roomCopied.color);
-                roomCreated.name = roomCopied.name;
-                roomCreated.mapBGName = roomCopied.mapBGName;
-                for (int j = 0; j < roomCopied.cells.Count; j++)
-                {
-                    cellCopied = roomCopied.cells[j];
-                    CreateCell(cellCopied.position, roomCreated, cellCopied.id);
-                }
-                for (int j = 0; j < roomCopied.doors.Count; j++)
-                {
-                    doorCopied = roomCopied.doors[j];
-                    doorCreated = CreateDoor(doorCopied.position, doorCopied.direction, null);
-                    doorCopied.CopyTo(doorCreated.door);
-                    doorCreated.UpdateFromData();
-                }
+                LoadRoom(asset.rooms[i]);
             }
         }
 
@@ -121,6 +102,33 @@ public class EnvironmentController : MonoBehaviour
                 }
             }
         }
+    }
+
+    public Room LoadRoom(Room roomData)
+    {
+        var roomCreated = CreateRoom(roomData.color);
+        roomCreated.name = roomData.name;
+        roomCreated.mapBGName = roomData.mapBGName;
+        Cell cellCopied;
+        for (int j = 0; j < roomData.cells.Count; j++)
+        {
+            cellCopied = roomData.cells[j];
+            CreateCell(cellCopied.position, roomCreated, cellCopied.id);
+        }
+        for (int j = 0; j < roomData.doors.Count; j++)
+        {
+            LoadDoor(roomData.doors[j]);
+        }
+        return roomCreated;
+    }
+
+    public Door LoadDoor(Door doorData)
+    {
+        var doorCopied = doorData;
+        var doorCreated = CreateDoor(doorCopied.position, doorCopied.direction, null);
+        doorCopied.CopyTo(doorCreated.door);
+        doorCreated.UpdateFromData();
+        return doorCreated.door;
     }
 
     public Coordinate realSize;
@@ -238,7 +246,7 @@ public class EnvironmentController : MonoBehaviour
 
     public DoorInstance doorPref;
     public List<DoorInstance> doors = new List<DoorInstance>();
-    public DoorInstance CreateDoor(Coordinate position, Towards direction, Sprite sprite)
+    public DoorInstance CreateDoor(Coordinate position, Towards direction, string spriteName)
     {
         var cell = CellFromPosition(position);
         if (cell)
@@ -257,7 +265,7 @@ public class EnvironmentController : MonoBehaviour
             var door = Instantiate(doorPref, (Vector2)position, direction.GetUIRotation(), transform);
 
             var doorData = door.door;
-            doorData.spriteName = sprite ? sprite.name : "Icon_Door_Open";
+            doorData.spriteName = spriteName ?? "Icon_Door_Open";
             doorData.position = position;
             doorData.direction = direction;
 
@@ -269,7 +277,7 @@ public class EnvironmentController : MonoBehaviour
         }
         return null;
     }
-    public void DestroyDoor(Coordinate position, Towards direction)
+    public Door DestroyDoor(Coordinate position, Towards direction)
     {
         var cell = CellFromPosition(position);
         if (cell)
@@ -277,7 +285,7 @@ public class EnvironmentController : MonoBehaviour
             var cellB = CellFromPosition(position + direction.GetRelativeCoordinate());
             if (!cellB)
             {
-                return;
+                return null;
             }
 
             if (cell.room != cellB.room)
@@ -289,11 +297,14 @@ public class EnvironmentController : MonoBehaviour
             var door = doors.FirstOrDefault((a) => a.door.position == position && a.door.direction == direction);
             if (door != null)
             {
+                var doorBackup = door.door;
                 doors.Remove(door);
                 room?.doors.Remove(door.door);
                 Destroy(door.gameObject);
+                return doorBackup;
             }
         }
+        return null;
     }
 
     public List<Room> rooms = new List<Room>();
