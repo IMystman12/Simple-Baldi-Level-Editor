@@ -5,15 +5,6 @@ public class IconInstance : MonoBehaviour, IClickable
 {
     public Icon icon;
     public SpriteRenderer spriteRenderer;
-    public IconMode iconMode;
-    public enum IconMode
-    {
-        None,
-        Notebook,
-        Exit
-    }
-    bool available => EditorPad.Instance.tool.state == null && EditorPad.Instance.editorState.state != null && isIcon;
-    bool isIcon => EditorPad.Instance.editorState.state.GetType() == typeof(Categories.Editor_Icon) && IconEditor.Instance && !IconEditor.Instance.isActiveAndEnabled;
     private void Awake()
     {
         icon = new Icon()
@@ -25,40 +16,6 @@ public class IconInstance : MonoBehaviour, IClickable
         };
         UpdateFromData();
     }
-
-    public void Clicked()
-    {
-        if (available)
-        {
-            if (isIcon)
-            {
-                IconEditor.Instance.Open(this);
-            }
-        }
-    }
-
-    public void OffHighlight()
-    {
-        if (available)
-        {
-            if (spriteRenderer)
-            {
-                spriteRenderer.transform.localScale = Vector3.one;
-            }
-        }
-    }
-
-    public void OnHighlight()
-    {
-        if (available)
-        {
-            if (spriteRenderer)
-            {
-                spriteRenderer.transform.localScale = Vector3.one * 3;
-            }
-        }
-    }
-
     public void UpdateFromData()
     {
         if (spriteRenderer)
@@ -69,4 +26,9 @@ public class IconInstance : MonoBehaviour, IClickable
             transform.eulerAngles = Vector3.forward * icon.rotation;
         }
     }
+    public void Clicked() => IconEditor.Instance.Open(this);
+    public void OffHighlight() => spriteRenderer.transform.localScale = Vector3.one;
+    public void OnHighlight() => spriteRenderer.transform.localScale = Vector3.one * 3;
+    public bool IsAvailable() => spriteRenderer && EditorPad.Instance.tool.state == null && EditorPad.Instance.editorState.state != null && EditorPad.Instance.editorState.state.GetType() == typeof(Categories.Editor_Icon) && !IconEditor.Instance.isActiveAndEnabled;
 }
+

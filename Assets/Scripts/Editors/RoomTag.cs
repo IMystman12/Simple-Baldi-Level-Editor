@@ -9,4 +9,5 @@ public class RoomTag : MonoBehaviour, IClickable
     public void Clicked() => RoomEditor.Instance.Open(this);
     public void OffHighlight() => text.color = RoomEditor.Instance.currentTag == this ? Color.yellow : Color.white;
     public void OnHighlight() => text.color = Color.green;
+    public bool IsAvailable() => this != null && EditorPad.Instance.tool.state == null;
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EntityInstance : MonoBehaviour
+public class EntityInstance : Posable
 {
     public virtual void GameStart()
     {
@@ -12,5 +12,9 @@ public class EntityInstance : MonoBehaviour
     public virtual void GameUpdate()
     {
 
+    }
+    protected void Move(Vector2 vector)
+    {
+        
     }
 }

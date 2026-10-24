@@ -25,7 +25,7 @@ public class RoomEditor : Singleton<RoomEditor>
 
         SpriteSelector.Instance.Open(Categories.Category.Room);
         SpriteSelector.Instance.TryToSetValue(roomTag.room.mapBGName);
-        SpriteSelector.Instance.onCheckValue?.AddListener(() =>
+        SpriteSelector.Instance.onCheckValue.AddListener(() =>
         {
             roomTag.room.mapBGName = SpriteSelector.Instance.Selection.name;
             roomTag.room.ChangeColor(EditorPad.Instance.ec);
@@ -33,12 +33,14 @@ public class RoomEditor : Singleton<RoomEditor>
     }
     public void Close()
     {
+        SpriteSelector.Instance.onCheckValue.RemoveAllListeners();
         SpriteSelector.Instance.Close();
         gameObject.SetActive(false);
         EditorPad.Instance.Pause(false);
     }
 
     public void CreateRoom() => EditorPad.Instance.RecordStep(new HistoryAction_Room(new Room() { color = Color.white }, false));
+    public void CreateBaseRoom() => new HistoryAction_Room(new Room() { color = Color.white }, false).Apply(false);
     public void DestroyThis() => EditorPad.Instance.RecordStep(new HistoryAction_Room(currentTag.room, true));
 
     public void UpdateTags()

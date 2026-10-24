@@ -30,7 +30,7 @@ public class OptionEditor : Singleton<OptionEditor>
         {
             if (int.TryParse(array[i], out val))
             {
-                result[i] = val;
+                result[i] = Mathf.Clamp(val, 1, Mathf.Min(SystemInfo.maxTextureSize, 8192));
             }
             else
             {
@@ -38,6 +38,7 @@ public class OptionEditor : Singleton<OptionEditor>
                 return;
             }
         }
+        ShowSize();
         EditorPad.Instance.ec.Resize(result);
     }
     public void ShowSize() => sizeField.text = string.Join(",", EditorPad.Instance.ec.size.x, EditorPad.Instance.ec.size.z);

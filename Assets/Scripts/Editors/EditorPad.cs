@@ -70,7 +70,7 @@ public class EditorPad : Singleton<EditorPad>
 
     public LayerMask availableLayers;
     RaycastHit2D hit2D;
-    public IClickable clkCurrent, clkPrevious;
+    public IClickable clkCurrent, clkPrevious, clkNew;
     void ClickUpdate()
     {
         if (!inArea)
@@ -78,7 +78,11 @@ public class EditorPad : Singleton<EditorPad>
             return;
         }
         hit2D = Physics2D.Raycast(worldPoint, Camera.main.transform.forward, 99, availableLayers);
-        clkCurrent = hit2D.transform ? hit2D.transform.GetComponent<IClickable>() : null;
+        clkNew = hit2D.transform ? hit2D.transform.GetComponent<IClickable>() : null;
+        if (clkNew != null)
+        {
+            clkCurrent = clkNew.IsAvailable() ? clkNew : null;
+        }
         if (clkCurrent != clkPrevious)
         {
             clkPrevious?.OffHighlight();
@@ -136,6 +140,7 @@ public class EditorPad : Singleton<EditorPad>
     }
 
     private List<HistoryAction> steps = new List<HistoryAction>();
+    const int maxSteps = 256;
     //starts from -1 (non-step)
     int step = -1;
     public void Undo()
@@ -167,6 +172,10 @@ public class EditorPad : Singleton<EditorPad>
         }
         steps.Add(action);
         step++;
+        if (steps.Count > 256)
+        {
+            steps.RemoveRange(0, steps.Count - maxSteps);
+        }
     }
     public void ClearHistory()
     {
@@ -180,9 +189,8 @@ public class EditorPad : Singleton<EditorPad>
     {
         SpriteSelector.Instance.CheckSpriteFolder();
         Initialize();
-        RoomEditor.Instance.CreateRoom();
+        RoomEditor.Instance.CreateBaseRoom();
         Shader.EnableKeyword("_BG_REQUIRED");
-        tool.subscribe += (a) => Debug.Log($"Points Received: {string.Join(",,", a)}");
     }
 
     void Update()
@@ -206,6 +214,7 @@ public class EditorPad : Singleton<EditorPad>
 }
 public interface IClickable
 {
+    bool IsAvailable();
     void OnHighlight();
     void Clicked();
     void OffHighlight();
