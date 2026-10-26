@@ -26,9 +26,9 @@ public class IconInstance : MonoBehaviour, IClickable
             transform.eulerAngles = Vector3.forward * icon.rotation;
         }
     }
-    public void Clicked() => IconEditor.Instance.Open(this);
+    public void Clicked() => EditorPad.Instance.Open(EditorPad.EditorType.Icon, this);
     public void OffHighlight() => spriteRenderer.transform.localScale = Vector3.one;
     public void OnHighlight() => spriteRenderer.transform.localScale = Vector3.one * 3;
-    public bool IsAvailable() => spriteRenderer && EditorPad.Instance.tool.state == null && EditorPad.Instance.editorState.state != null && EditorPad.Instance.editorState.state.GetType() == typeof(Categories.Editor_Icon) && !IconEditor.Instance.isActiveAndEnabled;
+    public bool IsAvailable() => spriteRenderer && EditorPad.Instance.tool.state == null && EditorPad.Instance.editorState.state != null && EditorPad.Instance.editorState.state.GetType() == typeof(Categories.Editor_Icon) && EditorPad.SubEditorClosed;
 }
 

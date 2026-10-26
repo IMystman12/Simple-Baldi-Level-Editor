@@ -78,7 +78,7 @@ public class EnvironmentController : MonoBehaviour
             }
         }
 
-        RoomEditor.Instance.UpdateTags();
+        EditorPad.Instance.UpdateRoomTags();
 
         if (EditorPad.Instance)
         {
@@ -91,15 +91,13 @@ public class EnvironmentController : MonoBehaviour
                 iconCopied.CopyTo(icon.icon);
                 icon.UpdateFromData();
             }
-            if (LightmapEditor.Instance)
+
+            Light lightCopied;
+            for (int i = 0; i < asset.lights.Length; i++)
             {
-                Light lightCopied;
-                for (int i = 0; i < asset.lights.Length; i++)
-                {
-                    lightCopied = asset.lights[i];
-                    LightmapEditor.Instance.light = lightCopied;
-                    LightmapEditor.Instance.CreateLight(lightCopied.position);
-                }
+                lightCopied = asset.lights[i];
+                EditorPad.Instance.light = lightCopied;
+                EditorPad.Instance.CreateLight(lightCopied.position);
             }
         }
     }
@@ -126,9 +124,13 @@ public class EnvironmentController : MonoBehaviour
     {
         var doorCopied = doorData;
         var doorCreated = CreateDoor(doorCopied.position, doorCopied.direction, null);
-        doorCopied.CopyTo(doorCreated.door);
-        doorCreated.UpdateFromData();
-        return doorCreated.door;
+        if (doorCreated)
+        {
+            doorCopied.CopyTo(doorCreated.door);
+            doorCreated.UpdateFromData();
+            return doorCreated.door;
+        }
+        return doorCopied;
     }
 
     public Coordinate realSize;
@@ -139,7 +141,7 @@ public class EnvironmentController : MonoBehaviour
         realSize = sizeNew - Coordinate.one;
         RegenerateLight();
 
-        OptionEditor.Instance?.UpdateSize(sizeNew);
+        EditorPad.Instance.UpdateLevelSize(sizeNew);
     }
 
     public Sprite[] cellSprites = new Sprite[16];
@@ -261,21 +263,20 @@ public class EnvironmentController : MonoBehaviour
             {
                 ConnectCell(cell, cellB);
             }
-
-            var door = Instantiate(doorPref, (Vector2)position, direction.GetUIRotation(), transform);
-
-            var doorData = door.door;
-            doorData.spriteName = spriteName ?? "Icon_Door_Open";
-            doorData.position = position;
-            doorData.direction = direction;
-
-            door.UpdateFromData();
-
-            cell.data.GetRoom(this).doors.Add(doorData);
-            doors.Add(door);
-            return door;
         }
-        return null;
+
+        var door = Instantiate(doorPref, (Vector2)position, direction.GetUIRotation(), transform);
+
+        var doorData = door.door;
+        doorData.spriteName = spriteName ?? "Icon_Door_Open";
+        doorData.position = position;
+        doorData.direction = direction;
+        cell?.data.GetRoom(this).doors.Add(doorData);
+
+        door.UpdateFromData();
+
+        doors.Add(door);
+        return door;
     }
     public Door DestroyDoor(Coordinate position, Towards direction)
     {
@@ -292,17 +293,18 @@ public class EnvironmentController : MonoBehaviour
             {
                 ConnectCell(cell, cellB, false);
             }
+        }
 
-            var room = cell.data.GetRoom(this);
-            var door = doors.FirstOrDefault((a) => a.door.position == position && a.door.direction == direction);
-            if (door != null)
-            {
-                var doorBackup = door.door;
-                doors.Remove(door);
-                room?.doors.Remove(door.door);
-                Destroy(door.gameObject);
-                return doorBackup;
-            }
+        var door = doors.FirstOrDefault(b => b.door.position == position && b.door.direction == direction);
+        if (door != null)
+        {
+            var doorBackup = door.door;
+
+            doors.Remove(door);
+            rooms.FirstOrDefault(a => a.doors.Any(b => b.position == position && b.direction == direction)).doors.Remove(door.door);
+
+            Destroy(door.gameObject);
+            return doorBackup;
         }
         return null;
     }
@@ -422,6 +424,10 @@ public class EnvironmentController : MonoBehaviour
         }
         ConnectSurround(cellA, false);
         cellA.room.cells.Remove(cellA.data);
+        foreach (var a in TowardsExtension.All)
+        {
+            DestroyDoor(cellA.data.position, a);
+        }
         Destroy(cellA.gameObject);
     }
     public bool ContainsCoordinates(Coordinate vector) => vector.x >= 0 && vector.z >= 0 && vector.x < size.x && vector.z < size.z;

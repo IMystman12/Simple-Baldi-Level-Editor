@@ -13,7 +13,7 @@ public class Categories : Singleton<Categories>
         Icon,
         Door,
         Lightmap,
-        Options,
+        Setting,
         Save,
         BaldiMan
     }
@@ -78,12 +78,12 @@ public class Categories : Singleton<Categories>
                 Toolbar.Instance.Open();
                 EditorPad.Instance.editorState.ChangeState(new Editor_Lightmap());
                 break;
-            case Category.Options:
-                OptionEditor.Instance.Open();
-                toggles[(int)Category.Options].isOn = false;
+            case Category.Setting:
+                EditorPad.Instance.Open(EditorPad.EditorType.Setting);
+                toggles[(int)Category.Setting].isOn = false;
                 break;
             case Category.Save:
-                SaveEditor.Instance.Open();
+                EditorPad.Instance.Open(EditorPad.EditorType.Save);
                 toggles[(int)Category.Save].isOn = false;
                 break;
             case Category.BaldiMan:
@@ -108,7 +108,7 @@ public class Categories : Singleton<Categories>
             Coordinate[] array;
             public HistoryAction_Cell(Coordinate[] coordinates)
             {
-                r = RoomEditor.Instance.currentTag.room;
+                r = EditorPad.Instance.currentRoomTag.room;
                 i = SpriteSelector.Instance.selectionIndex;
                 invert = EditorPad.Instance.removal;
                 array = coordinates;
@@ -255,13 +255,13 @@ public class Categories : Singleton<Categories>
     {
         public override void Enter()
         {
-            LightmapEditor.Instance.StartRender();
+            EditorPad.Instance.StartLightRender();
             EditorPad.Instance.tool.subscribe = (a) => EditorPad.Instance.RecordStep(new HistoryAction_Lightmap(a));
         }
         public override void Exit()
         {
             EditorPad.Instance.tool.subscribe = null;
-            LightmapEditor.Instance.StopRender();
+            EditorPad.Instance.StopLightRender();
         }
         public class HistoryAction_Lightmap : HistoryAction
         {
@@ -275,14 +275,14 @@ public class Categories : Singleton<Categories>
             {
                 foreach (var b in array)
                 {
-                    LightmapEditor.Instance.CreateLight(b);
+                    EditorPad.Instance.CreateLight(b);
                 }
             }
             protected override void Negative()
             {
                 foreach (var b in array)
                 {
-                    LightmapEditor.Instance.DestroyLight(b);
+                    EditorPad.Instance.DestroyLight(b);
                 }
             }
         }
