@@ -207,13 +207,13 @@ public class Categories : Singleton<Categories>
                     }
                     else if (Mathf.Abs(posA.x - a[0].x) != Mathf.Abs(posA.z - a[0].z) && (Mathf.Abs(posA.x - a[0].x) == 1 || Mathf.Abs(posA.z - a[0].z) == 1))
                     {
-                        Toolbar.Instance.tip.text = "Door: Position?";
                         Towards direction = TowardsExtension.FromPointAToB(posA, a[0]);
-                        if (direction != Towards.NaD && EditorPad.Instance.ec.CellFromPosition(posA))
+                        if (direction != Towards.NaD)
                         {
                             EditorPad.Instance.RecordStep(new HistoryAction_Door(posA, direction));
                         }
                         hasPosA = false;
+                        Toolbar.Instance.tip.text = "Door: Position?";
                         EditorPad.Instance.tool.state.ForceReset();
                     }
                 };

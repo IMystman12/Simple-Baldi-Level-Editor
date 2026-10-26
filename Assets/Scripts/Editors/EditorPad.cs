@@ -77,14 +77,15 @@ public class EditorPad : Singleton<EditorPad>
     {
         if (!inArea)
         {
-            return;
+            clkNew = null;
         }
-        hit2D = Physics2D.Raycast(worldPoint, Camera.main.transform.forward, 99, availableLayers);
-        clkNew = hit2D.transform ? hit2D.transform.GetComponent<IClickable>() : null;
-        if (clkNew != null)
+        else
         {
-            clkCurrent = clkNew.IsAvailable() ? clkNew : null;
+            hit2D = Physics2D.Raycast(worldPoint, Camera.main.transform.forward, 99, availableLayers);
+            clkNew = hit2D.transform ? hit2D.transform.GetComponent<IClickable>() : null;
         }
+
+        clkCurrent = (clkNew != null) ? (clkNew.IsAvailable() ? clkNew : null) : null;
         if (clkCurrent != clkPrevious)
         {
             clkPrevious?.OffHighlight();

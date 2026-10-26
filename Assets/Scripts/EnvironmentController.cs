@@ -253,7 +253,7 @@ public class EnvironmentController : MonoBehaviour
         var cell = CellFromPosition(position);
         if (cell)
         {
-            if (cell.data.GetRoom(this).doors.FirstOrDefault((a) => a.position == position && a.direction == direction) != null)
+            if (cell.data.GetRoom(this).doors.Any((a) => a.position == position && a.direction == direction))
             {
                 return null;
             }
@@ -280,31 +280,26 @@ public class EnvironmentController : MonoBehaviour
     }
     public Door DestroyDoor(Coordinate position, Towards direction)
     {
-        var cell = CellFromPosition(position);
-        if (cell)
-        {
-            var cellB = CellFromPosition(position + direction.GetRelativeCoordinate());
-            if (!cellB)
-            {
-                return null;
-            }
-
-            if (cell.room != cellB.room)
-            {
-                ConnectCell(cell, cellB, false);
-            }
-        }
-
+        Debug.Log("A");
         var door = doors.FirstOrDefault(b => b.door.position == position && b.door.direction == direction);
         if (door != null)
         {
             var doorBackup = door.door;
-
             doors.Remove(door);
-            rooms.FirstOrDefault(a => a.doors.Any(b => b.position == position && b.direction == direction)).doors.Remove(door.door);
-
             Destroy(door.gameObject);
+            Debug.Log("B");
+            rooms.FirstOrDefault(a => a.doors.Any(b => b.position == position && b.direction == direction))?.doors.Remove(doorBackup);
             return doorBackup;
+        }
+
+        var cell = CellFromPosition(position);
+        if (cell)
+        {
+            var cellB = CellFromPosition(position + direction.GetRelativeCoordinate());
+            if (cellB && cell.room != cellB.room)
+            {
+                ConnectCell(cell, cellB, false);
+            }
         }
         return null;
     }
