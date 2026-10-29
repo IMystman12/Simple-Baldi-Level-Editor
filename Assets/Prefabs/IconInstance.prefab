@@ -51,6 +51,7 @@ MonoBehaviour:
     spriteName: 
     color: {r: 1, g: 1, b: 1, a: 1}
   spriteRenderer: {fileID: 5573764959445249183}
+  mc: {fileID: 1896009023012582378}
 --- !u!58 &3457791239307058797
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -61,7 +62,7 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}

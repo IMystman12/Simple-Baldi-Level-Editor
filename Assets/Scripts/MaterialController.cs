@@ -8,6 +8,7 @@ public class MaterialController : MonoBehaviour
     Renderer renderer;
     public MaterialPropertyBlock mpb;
     public static Texture2D lightmap;
+    public const string colorProperty = "_Color";
     void Awake()
     {
         mpb = new MaterialPropertyBlock();
@@ -18,6 +19,7 @@ public class MaterialController : MonoBehaviour
 
     public void UpdateLightmap()
     {
+        if (!lightmap) return;
         OpenModifier();
         mpb.SetTexture("_LightMap", lightmap);
         CloseModifier();

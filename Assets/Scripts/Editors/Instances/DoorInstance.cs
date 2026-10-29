@@ -14,7 +14,7 @@ public class DoorInstance : MonoBehaviour
             var cell = EditorPad.Instance.ec.CellFromPosition(door.position);
             if (cell)
             {
-                mc.mpb.SetColor("_Color", cell.room.color);
+                mc.mpb.SetColor(MaterialController.colorProperty, cell.room.color);
             }
             mc.CloseModifier();
             spriteRenderer.sprite = SpriteSelector.Instance.doors.FirstOrDefault(a => a.name == door.spriteName) ?? spriteRenderer.sprite;

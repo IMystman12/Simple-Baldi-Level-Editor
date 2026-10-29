@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Notebook : Posable
+public class Notebook : BalPosable
 {
     [SerializeField] private CircleCollider2D circleCollider;
     void OnTriggerEnter2D(Collider2D collision)

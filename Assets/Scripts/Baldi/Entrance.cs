@@ -2,15 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Entrance : Posable
+public class Entrance : BalPosable
 {
     [SerializeField] private CircleCollider2D circleCollider;
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Player"))
+        if (collision.CompareTag("Player") && BaldiManager.Instance.GetEntrance(this))
         {
             circleCollider.enabled = false;
-            BaldiManager.Instance.GetEntrance(this);
         }
     }
     public void ResetState()

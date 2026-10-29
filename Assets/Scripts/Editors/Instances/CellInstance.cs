@@ -58,7 +58,7 @@ public class CellInstance : MonoBehaviour
         if (rendererBase)
         {
             mc_Base.OpenModifier();
-            mc_Base.mpb.SetColor("_Color", color);
+            mc_Base.mpb.SetColor(MaterialController.colorProperty, color);
             mc_Base.CloseModifier();
         }
 
@@ -67,7 +67,7 @@ public class CellInstance : MonoBehaviour
             mc_BG.OpenModifier();
 
             color.a = 0.25f;
-            mc_BG.mpb.SetColor("_Color", color);
+            mc_BG.mpb.SetColor(MaterialController.colorProperty, color);
 
 
             if (SpriteSelector.Instance)
@@ -80,6 +80,22 @@ public class CellInstance : MonoBehaviour
             }
 
             mc_BG.CloseModifier();
+        }
+    }
+    public Transform[] colliders = new Transform[4];
+    public void UpdateCollider()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            colliders[i].gameObject.SetActive(true);
+        }
+        var list = TowardsExtension.OpenTowardsFromBin(data.id);
+        for (int i = 0; i < 4; i++)
+        {
+            if (list.Contains((Towards)i))
+            {
+                colliders[i].gameObject.SetActive(false);
+            }
         }
     }
 }

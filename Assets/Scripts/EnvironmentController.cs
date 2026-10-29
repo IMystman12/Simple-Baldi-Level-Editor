@@ -13,7 +13,8 @@ public class EnvironmentController : MonoBehaviour
         rooms = rooms.ToArray(),
         icons = icons.ToArray(),
         lights = lights.ToArray(),
-        extraSprites = CollectExtraSprites()
+        extraSprites = CollectExtraSprites(),
+        balObjects = balObjects.ToArray()
     };
 
     ExtraSprite[] CollectExtraSprites()
@@ -67,6 +68,8 @@ public class EnvironmentController : MonoBehaviour
         return extraSprites.ToArray();
     }
 
+    public List<BalObject> balObjects = new List<BalObject>();
+
     public void Build(LevelAsset asset)
     {
         Resize(asset.size);
@@ -75,6 +78,11 @@ public class EnvironmentController : MonoBehaviour
             for (int i = 0; i < asset.rooms.Length; i++)
             {
                 LoadRoom(asset.rooms[i]);
+            }
+
+            for (int i = 0; i < asset.balObjects.Length; i++)
+            {
+                BaldiManager.Instance.LoadObject(asset.balObjects[i]);
             }
         }
 
@@ -132,6 +140,7 @@ public class EnvironmentController : MonoBehaviour
         }
         return doorCopied;
     }
+
 
     public Coordinate realSize;
     public Coordinate size;
@@ -307,10 +316,14 @@ public class EnvironmentController : MonoBehaviour
     public List<Icon> icons = new List<Icon>();
     public CellInstance CreateCell(Coordinate position, Room room, int id = 15)
     {
-        if (ContainsCoordinates(position) && !CellFromPosition(position))
+        if (ContainsCoordinates(position))
         {
             CellInstance cellInstance;
-            cellInstance = Instantiate(cellPref, (Vector2)position, Quaternion.identity, transform);
+            cellInstance = CellFromPosition(position);
+            if (!cellInstance)
+            {
+                cellInstance = Instantiate(cellPref, (Vector2)position, Quaternion.identity, transform);
+            }
             cellInstance.data.position = position;
             cellInstance.room = room;
             cellInstance.room.cells.Add(cellInstance.data);
@@ -416,7 +429,6 @@ public class EnvironmentController : MonoBehaviour
         {
             return;
         }
-        ConnectSurround(cellA, false);
         cellA.room.cells.Remove(cellA.data);
         foreach (var a in TowardsExtension.All)
         {
@@ -501,6 +513,14 @@ public class EnvironmentController : MonoBehaviour
             a.UpdateLightmap();
         }
     }
+
+    public void UpdateColliders()
+    {
+        foreach (var a in cells.Values)
+        {
+            a.UpdateCollider();
+        }
+    }
 }
 
 [Serializable]
@@ -551,6 +571,7 @@ public class LevelAsset
     public Icon[] icons = new Icon[0];
     public Light[] lights = new Light[0];
     public ExtraSprite[] extraSprites = new ExtraSprite[0];
+    public BalObject[] balObjects = new BalObject[0];
 }
 [Serializable]
 public class ExtraSprite
@@ -609,4 +630,11 @@ public enum LightCalculateMode
     Additive,
     Greatest,
     EnumLength
+}
+[Serializable]
+public class BalObject
+{
+    public int type;
+    public Vector2 position;
+    public float rotation;
 }

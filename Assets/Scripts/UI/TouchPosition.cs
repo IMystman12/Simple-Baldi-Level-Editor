@@ -3,41 +3,20 @@ using UnityEngine.EventSystems;
 
 public class TouchPosition : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-    bool activated;
-    int id;
-    public static Vector3 point;
-    private void Start()
-    {
-        if (!Input.touchSupported&&Application.isMobilePlatform)
-        {
-            Destroy(this);
-        }
-    }
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (activated)
+        if (InputManager.pointerEvent == null)
         {
-            return;
+            InputManager.pointerEvent = eventData;
+            InputManager.Instance.phase = InputManager.ButtonPhase.Hold;
         }
-        activated = true;
-        id = eventData.pointerId;
-        point = eventData.position;
     }
-    void Update()
+    public void OnPointerUp(PointerEventData eventData)
     {
-        if (!activated)
+        if (eventData.pointerId == InputManager.pointerEvent.pointerId)
         {
-            return;
+            InputManager.Instance.phase = InputManager.ButtonPhase.Release;
+            InputManager.pointerEvent = null;
         }
-        foreach (var a in Input.touches)
-        {
-            if (a.fingerId == id)
-            {
-                point = a.position;
-                return;
-            }
-        }
-        activated = false;
     }
-    public void OnPointerUp(PointerEventData eventData) => activated &= !(eventData.pointerId == id);
 }

@@ -137,7 +137,6 @@ public class SpriteSelector : Singleton<SpriteSelector>
         }
         toggles.Clear();
         Toggle t;
-        bool flag = true;
 
         switch (category)
         {
@@ -154,40 +153,18 @@ public class SpriteSelector : Singleton<SpriteSelector>
                 sprites = doors.ToArray();
                 break;
             case Categories.Category.BaldiMan:
-                flag = false;
-
-                for (int i = 0; i < 2; i++)
-                {
-                    t = Instantiate(togglePref, togglePref.transform.parent);
-                    t.gameObject.SetActive(true);
-                    toggles.Add(t);
-                }
-                toggles[0].image.sprite = notebookSprite;
-                toggles[1].image.sprite = entranceSprite;
-
-                for (int i = 0; i < characters.Length; i++)
-                {
-                    t = Instantiate(togglePref, togglePref.transform.parent);
-
-                    t.image.sprite = characterSprite;
-                    t.image.color = characters[i];
-
-                    t.gameObject.SetActive(true);
-                    toggles.Add(t);
-                }
+                sprites = baldiMan.ToArray();
                 break;
         }
 
-        if (flag)
+        for (int i = 0; i < sprites.Length; i++)
         {
-            for (int i = 0; i < sprites.Length; i++)
-            {
-                t = Instantiate(togglePref, togglePref.transform.parent);
-                t.image.sprite = sprites[i];
-                t.gameObject.SetActive(true);
-                toggles.Add(t);
-            }
+            t = Instantiate(togglePref, togglePref.transform.parent);
+            t.image.sprite = sprites[i];
+            t.gameObject.SetActive(true);
+            toggles.Add(t);
         }
+        if (category == Categories.Category.BaldiMan) toggles[toggles.Count - 1].image.color = Color.green;
 
         page = 0;
         maxPage = Mathf.CeilToInt((float)toggles.Count / togglePerPage);
@@ -203,26 +180,6 @@ public class SpriteSelector : Singleton<SpriteSelector>
     public Sprite[] cells = new Sprite[17];
     public List<Sprite> icons = new List<Sprite>();
     public List<Sprite> doors = new List<Sprite>();
+    public List<Sprite> baldiMan = new List<Sprite>();
     public List<Sprite> extraSprites = new List<Sprite>();
-
-    public Sprite characterSprite, notebookSprite, entranceSprite;
-    Color[] characters = new Color[]
-    {
-         //Player
-         Color.white,
-        //Baldi
-        new Color(0,1,0,1),
-        //Mrs Pomp
-         new Color(1f, 0.9499881f, 0f, 1f),
-         //Principal
-          new Color(0f, 0.1176471f, 0.4823529f, 1f),
-          //Crafter
-          Color.white,
-          //Sweep
-          new Color(0f, 0.6226415f, 0.06141377f, 1f),
-         //Prize
-         new Color(0f, 0.8746934f, 1f, 1f),
-         //LookAt
-          new Color(0.2588235f, 0.2705882f, 0.1607843f, 1f)
-    };
 }

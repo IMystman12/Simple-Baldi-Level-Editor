@@ -9,5 +9,6 @@ public class RoomInstance : MonoBehaviour, IClickable
     public void Clicked() => EditorPad.Instance.Open(EditorPad.EditorType.Room, this);
     public void OffHighlight() => text.color = EditorPad.Instance.currentRoomTag == this ? Color.yellow : Color.white;
     public void OnHighlight() => text.color = Color.green;
-    public bool IsAvailable() => this != null && EditorPad.Instance.tool.state == null && EditorPad.SubEditorClosed;
+    public bool IsAvailable() => EditorPad.Instance.tool.state == null && EditorPad.SubEditorClosed;
+    public bool IsBaseAvailable() => text;
 }

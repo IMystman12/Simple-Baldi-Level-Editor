@@ -17,6 +17,10 @@ public class Toolbar : Singleton<Toolbar>
         public Action<Coordinate[]> subscribe;
         public override void ChangeState(Tool_StateBase newState)
         {
+            if (state != null)
+            {
+                state.subscribe = null;
+            }
             base.ChangeState(newState);
             if (state != null)
             {
@@ -26,7 +30,7 @@ public class Toolbar : Singleton<Toolbar>
     }
     public class Tool_StateBase : StateBase
     {
-        protected bool fitForBuild => EditorPad.Instance.inArea && EditorPad.Instance.ec.ContainsCoordinates(EditorPad.Instance.cursorGridPos);
+        protected bool fitForBuild => EditorPad.Instance.inArea && EditorPad.Instance.ec.ContainsCoordinates(EditorPad.cursorGridPos);
         public Action<Coordinate[]> subscribe;
         protected void ReceivePosition(params Coordinate[] positions) => subscribe?.Invoke(positions);
         public virtual void ForceReset()
@@ -34,15 +38,15 @@ public class Toolbar : Singleton<Toolbar>
     }
     public class Tool_Painter : Tool_StateBase
     {
-        public static bool clickMode;
         Coordinate pos = Coordinate.one * -1;
         public override void Update()
         {
-            if (fitForBuild && (clickMode ? EditorPad.SubmitDelayed : EditorPad.Submit) && pos != EditorPad.Instance.cursorGridPos)
+            if (InputManager.Submit && fitForBuild && pos != EditorPad.cursorGridPos)
             {
-                pos = EditorPad.Instance.cursorGridPos;
+                pos = EditorPad.cursorGridPos;
                 ReceivePosition(pos);
             }
+            if (InputManager.SubmitUp) ForceReset();
         }
         public override void ForceReset() => pos = Coordinate.one * -1;
     }
@@ -56,30 +60,30 @@ public class Toolbar : Singleton<Toolbar>
         {
             if (fitForBuild)
             {
-                gridPos = EditorPad.Instance.cursorGridPos;
+                gridPos = EditorPad.cursorGridPos;
                 _string = first ? "TBD" : $"({Mathf.Abs(posA.x - gridPos.x) + 1}, {Mathf.Abs(posA.z - gridPos.z) + 1})";
                 Instance.tip.text = $"Selected Size: {_string}";
-                if (EditorPad.SubmitDelayed)
+            }
+            if (InputManager.SubmitClick && fitForBuild)
+            {
+                if (first)
                 {
-                    if (first)
+                    first = false;
+                    posA = gridPos;
+                }
+                else
+                {
+                    var posB = gridPos;
+                    List<Coordinate> positions = new List<Coordinate>();
+                    for (int j = Mathf.Min(posA.z, posB.z), j0 = Mathf.Max(posA.z, posB.z); j <= j0; j++)
                     {
-                        first = false;
-                        posA = gridPos;
-                    }
-                    else
-                    {
-                        var posB = gridPos;
-                        List<Coordinate> positions = new List<Coordinate>();
-                        for (int j = Mathf.Min(posA.z, posB.z), j0 = Mathf.Max(posA.z, posB.z); j <= j0; j++)
+                        for (int i = Mathf.Min(posA.x, posB.x), i0 = Mathf.Max(posA.x, posB.x); i <= i0; i++)
                         {
-                            for (int i = Mathf.Min(posA.x, posB.x), i0 = Mathf.Max(posA.x, posB.x); i <= i0; i++)
-                            {
-                                positions.Add(new Coordinate(i, j));
-                            }
+                            positions.Add(new Coordinate(i, j));
                         }
-                        ReceivePosition(positions.ToArray());
-                        first = true;
                     }
+                    ReceivePosition(positions.ToArray());
+                    first = true;
                 }
             }
         }
@@ -98,8 +102,8 @@ public class Toolbar : Singleton<Toolbar>
     }
     public void Close()
     {
-        gameObject.SetActive(false);
         EditorPad.Instance.tool.ChangeState(null);
+        gameObject.SetActive(false);
     }
     public void Disable(int i, bool val)
     {
@@ -112,6 +116,7 @@ public class Toolbar : Singleton<Toolbar>
     }
     public void UpdateValue()
     {
+        if (!gameObject.activeSelf) return;
         EditorPad.Instance.removal = remove.isOn;
         var tool = Tool.None;
         for (int i = 0; i < tools.Length; i++)

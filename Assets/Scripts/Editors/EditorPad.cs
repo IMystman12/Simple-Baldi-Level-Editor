@@ -21,11 +21,10 @@ public class EditorPad : Singleton<EditorPad>
 
     public Toolbar.ToolStateMachine tool = new Toolbar.ToolStateMachine();
     public TMP_Text positionTip;
-    public Coordinate cursorGridPos;
+    public static Coordinate cursorGridPos;
+    public static Vector3 worldPoint;
     void GridPositionUpdate()
     {
-        worldPoint = Camera.main.ScreenToWorldPoint(Input.touchSupported && Application.isMobilePlatform ? TouchPosition.point : Input.mousePosition);
-        cursorGridPos = Coordinate.ConvertToGridCoordinate(worldPoint);
         cursorGridPos.x = Mathf.Clamp(cursorGridPos.x, 0, ec.realSize.x);
         cursorGridPos.z = Mathf.Clamp(cursorGridPos.z, 0, ec.realSize.z);
         positionTip.text = cursorGridPos.ToString();
@@ -42,61 +41,62 @@ public class EditorPad : Singleton<EditorPad>
     {
         pauses += val ? 1 : -1;
         pause = pauses > 0;
-        controls.SetActive(!val && Input.touchSupported && Application.isMobilePlatform);
-        clkPrevious?.OffHighlight();
+        InputManager.Instance.SetMobileControl(!val);
         categories?.Pause(val);
     }
 
-    public static bool SubmitDelayed { get; set; }
-    public static bool Submit { get; set; }
-    public float movementX { get; set; }
-    public float movementY { get; set; }
-    public float zoom { get; set; }
-    public GameObject controls;
-    bool submitPrevious;
-
-    [SerializeField] private float mobileZoom = 0.001f, mobileMovement = 2, scaleSensitivity = 10;
-    float val;
     Vector2 pos;
-    Vector3 worldPoint;
+    Camera cam;
+    [SerializeField] private float scaleSensitivity = 10;
     void CameraUpdate()
     {
-        val = Time.fixedDeltaTime * 10;
-        pos.x = Mathf.Clamp(pos.x + Priority(Input.GetAxis("Horizontal"), movementX * mobileMovement) * val, 0, ec.realSize.x);
-        pos.y = Mathf.Clamp(pos.y + Priority(Input.GetAxis("Vertical"), movementY * mobileMovement) * val, 0, ec.realSize.z);
-        Camera.main.transform.position = new Vector3(pos.x, pos.y, Mathf.Round(transform.position.z));
+        pos.x = Mathf.Clamp(pos.x + InputManager.Instance.MovementX * cam.orthographicSize, 0, ec.realSize.x);
+        pos.y = Mathf.Clamp(pos.y + InputManager.Instance.MovementY * cam.orthographicSize, 0, ec.realSize.z);
+        cam.transform.position = new Vector3(pos.x, pos.y, Mathf.Round(transform.position.z));
         bg.position = new Vector3(Mathf.Floor(pos.x / 10) * 10 - 0.5f, Mathf.Floor(pos.y / 10) * 10 - 0.5f, 10);
-        Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + Priority(Input.GetAxis("Mouse ScrollWheel"), zoom * mobileZoom) * scaleSensitivity, 0.1f, 64);
+        cam.orthographicSize = Mathf.Clamp(cam.orthographicSize + InputManager.Instance.Zoom * scaleSensitivity, 0.1f, 64);
     }
-    float Priority(float a, float b) => Mathf.Abs(b) > Mathf.Abs(a) ? b : a;
 
     public LayerMask availableLayers;
-    RaycastHit2D hit2D;
-    public IClickable clkCurrent, clkPrevious, clkNew;
+    Collider2D hit2D;
+    public IClickable clkCurrent, clkPrevious;
     void ClickUpdate()
     {
         if (!inArea)
         {
-            clkNew = null;
+            clkCurrent = null;
         }
         else
         {
-            hit2D = Physics2D.Raycast(worldPoint, Camera.main.transform.forward, 99, availableLayers);
-            clkNew = hit2D.transform ? hit2D.transform.GetComponent<IClickable>() : null;
+            hit2D = Physics2D.OverlapPoint(worldPoint, availableLayers);
+            clkCurrent = hit2D ? hit2D.transform.GetComponent<IClickable>() : null;
         }
 
-        clkCurrent = (clkNew != null) ? (clkNew.IsAvailable() ? clkNew : null) : null;
         if (clkCurrent != clkPrevious)
         {
-            clkPrevious?.OffHighlight();
-            clkCurrent?.OnHighlight();
+            TryOffHighlight(clkPrevious);
             clkPrevious = clkCurrent;
         }
-        if (SubmitDelayed)
+
+        if (clkCurrent != null && clkCurrent.IsBaseAvailable())
         {
-            clkCurrent?.Clicked();
+            if (clkCurrent.IsAvailable())
+            {
+                clkCurrent.OnHighlight();
+                if (InputManager.SubmitClick) clkCurrent.Clicked();
+            }
+            else clkCurrent.OffHighlight();
         }
     }
+
+    public void TryOffHighlight(IClickable clickable)
+    {
+        if (clickable != null && clickable.IsBaseAvailable())
+        {
+            clickable.OffHighlight();
+        }
+    }
+
     #region "History Management"
     private List<HistoryAction> steps = new List<HistoryAction>();
     const int maxSteps = 256;
@@ -160,8 +160,7 @@ public class EditorPad : Singleton<EditorPad>
         Lightmap,
         Setting,
         Save,
-        Pos_Object,
-        Pos_Entity,
+        BalObject,
     }
     public void Open(EditorType type, object arg = null)
     {
@@ -179,12 +178,14 @@ public class EditorPad : Singleton<EditorPad>
         }
         list[(int)type].gameObject.SetActive(true);
 
+        charText.gameObject.SetActive(false);
+
         switch (type)
         {
             case EditorType.Room:
                 var roomTag = (RoomInstance)arg;
                 currentRoomTag = roomTag;
-                roomTags.ForEach(a => a.OffHighlight());
+                roomTags.ForEach(a => TryOffHighlight(a));
                 roomNameField.text = currentRoomTag.room.name;
                 SetRoomName();
                 roomColorField.color = currentRoomTag.room.color;
@@ -231,6 +232,17 @@ public class EditorPad : Singleton<EditorPad>
                     levelName = $"Level_{DateTime.Now.ToBinary()}";
                 }
                 levelNameField.text = levelName;
+                break;
+            case EditorType.BalObject:
+                balPosable = (BalPosable)arg;
+                ShowBalPosition();
+                ShowBalRotation();
+                if (balPosable.GetType() == typeof(NPC))
+                {
+                    npc = (NPC)balPosable;
+                    charText.gameObject.SetActive(true);
+                    charText.text.text = npc.type.ToString();
+                }
                 break;
         }
     }
@@ -365,8 +377,16 @@ public class EditorPad : Singleton<EditorPad>
     public IconInstance CreateIcon(Coordinate pos, string sprite)
     {
         var ico = Instantiate(iconPref, Coordinate.ConvertToMapCoordinate(pos), Quaternion.identity, ec.transform);
-        ico.icon.spriteName = sprite ?? "Icon_Item";
+
+        ico.icon = new Icon()
+        {
+            position = ico.transform.position,
+            rotation = 0,
+            color = Color.white,
+            spriteName = sprite ?? "Icon_Item",
+        };
         ico.UpdateFromData();
+
         ec.icons.Add(ico.icon);
         icons.Add(ico);
         return ico;
@@ -511,6 +531,14 @@ public class EditorPad : Singleton<EditorPad>
         var lightmap = ec.lightmap;
         lightmapRenderer.sprite = Sprite.Create(lightmap, new Rect(0, 0, lightmap.width, lightmap.height), Vector2.zero, 1);
         lightmapRenderer.enabled = true;
+        for (int i = 0; i < lights.Count; i++)
+        {
+            if (!lights[i])
+            {
+                lights.RemoveAt(i);
+                i--;
+            }
+        }
         foreach (var a in lights)
         {
             a.gameObject.SetActive(true);
@@ -675,16 +703,65 @@ public class EditorPad : Singleton<EditorPad>
     #endregion
     #region "BalObject"
     [Header("BalObject")]
-    [SerializeField] private int ph;
-    #endregion
-    #region "BalEntity"
-    [Header("BalEntity")]
-    [SerializeField] private int ph0;
+    public TMP_InputField balPositionField;
+    [HideInInspector] public BalPosable balPosable;
+    public void SetBalPosition()
+    {
+        string[] array = balPositionField.text.Split(',');
+        if (array.Length < 2)
+        {
+            ShowBalPosition();
+            return;
+        }
+        float val;
+        Vector2 result = default;
+        for (int i = 0; i < 2; i++)
+        {
+            if (float.TryParse(array[i], out val))
+            {
+                result[i] = val;
+            }
+            else
+            {
+                ShowBalPosition();
+                return;
+            }
+        }
+        balPosable.balObject.position = result;
+        balPosable.UpdateFromData();
+    }
+    public void ShowBalPosition() => balPositionField.text = string.Join(",", balPosable.balObject.position.x, balPosable.balObject.position.y);
+
+    public TMP_InputField balRotationField;
+    public void SetBalRotation()
+    {
+        float val;
+        if (float.TryParse(balRotationField.text, out val))
+        {
+            balPosable.balObject.rotation = val;
+            balPosable.UpdateFromData();
+        }
+    }
+    public void ShowBalRotation() => balRotationField.text = balPosable.balObject.rotation.ToString();
+
+    public TextButton charText;
+    public void SetCharText()
+    {
+        npc.type++;
+        if (npc.type == NPCType.EnumLength)
+        {
+            npc.type = 0;
+        }
+        npc.Initialize(npc.type);
+        charText.text.text = npc.type.ToString();
+    }
+    [HideInInspector] public NPC npc;
     #endregion
     #endregion
 
     private void Start()
     {
+        cam = Camera.main;
         SpriteSelector.Instance.CheckSpriteFolder();
         Initialize();
         CreateBaseRoom();
@@ -693,9 +770,6 @@ public class EditorPad : Singleton<EditorPad>
 
     void Update()
     {
-        SubmitDelayed = Submit && !submitPrevious;
-        submitPrevious = Submit;
-
         tool?.state?.Update();
 
         if (!pause)
@@ -708,11 +782,13 @@ public class EditorPad : Singleton<EditorPad>
             }
             CameraUpdate();
         }
+
     }
 }
 public interface IClickable
 {
     bool IsAvailable();
+    bool IsBaseAvailable();
     void OnHighlight();
     void Clicked();
     void OffHighlight();

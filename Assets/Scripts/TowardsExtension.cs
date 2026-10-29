@@ -40,9 +40,10 @@ public static class TowardsExtension
 
   public static int GetBinary(this Towards towards) => 1 << (int)towards;
 
-  public static Towards FromPointAToB(Coordinate coordinateA, Coordinate coordinateB)
+  public static Towards FromPointAToB(Coordinate coordinateA, Coordinate coordinateB) => FromDirection(coordinateB - coordinateA);
+
+  public static Towards FromDirection(Coordinate delta)
   {
-    Coordinate delta = coordinateB - coordinateA;
     if (delta.z > 0) return Towards.North;
     if (delta.x > 0) return Towards.East;
     if (delta.z < 0) return Towards.South;

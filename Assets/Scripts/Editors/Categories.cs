@@ -40,6 +40,7 @@ public class Categories : Singleton<Categories>
     public void UpdateBool()
     {
         Reset();
+        if (!gameObject.activeSelf) return;
 
         Category newCate = Category.None;
         for (int i = 0; i < toggles.Length; i++)
@@ -118,16 +119,13 @@ public class Categories : Singleton<Categories>
                 foreach (var b in array)
                 {
                     c = EditorPad.Instance.ec.CellFromPosition(b);
-                    if (!c)
+                    if (i == 16)
                     {
-                        if (i == 16)
-                        {
-                            EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, r));
-                        }
-                        else
-                        {
-                            EditorPad.Instance.ec.CreateCell(b, r, i);
-                        }
+                        EditorPad.Instance.ec.ConnectSurround(EditorPad.Instance.ec.CreateCell(b, r));
+                    }
+                    else
+                    {
+                        EditorPad.Instance.ec.CreateCell(b, r, i);
                     }
                 }
             }
@@ -138,6 +136,10 @@ public class Categories : Singleton<Categories>
                     c = EditorPad.Instance.ec.CellFromPosition(b);
                     if (c && c.room == r && (i > 15 || c.data.id == i))
                     {
+                        if (i > 15)
+                        {
+                            EditorPad.Instance.ec.ConnectSurround(c, false);
+                        }
                         EditorPad.Instance.ec.DestroyCell(c);
                     }
                 }
@@ -196,7 +198,6 @@ public class Categories : Singleton<Categories>
         public override void Enter()
         {
             Toolbar.Instance.tip.text = "Door: Position?";
-            Toolbar.Tool_Painter.clickMode = true;
             EditorPad.Instance.tool.subscribe = (a) =>
                 {
                     if (!hasPosA)
@@ -204,23 +205,25 @@ public class Categories : Singleton<Categories>
                         hasPosA = true;
                         posA = a[0];
                         Toolbar.Instance.tip.text = "Door: Direction?";
+                        return;
                     }
-                    else if (Mathf.Abs(posA.x - a[0].x) != Mathf.Abs(posA.z - a[0].z) && (Mathf.Abs(posA.x - a[0].x) == 1 || Mathf.Abs(posA.z - a[0].z) == 1))
+
+                    if (Mathf.Abs(posA.x - a[0].x) != Mathf.Abs(posA.z - a[0].z) && (Mathf.Abs(posA.x - a[0].x) == 1 || Mathf.Abs(posA.z - a[0].z) == 1))
                     {
                         Towards direction = TowardsExtension.FromPointAToB(posA, a[0]);
                         if (direction != Towards.NaD)
                         {
                             EditorPad.Instance.RecordStep(new HistoryAction_Door(posA, direction));
                         }
-                        hasPosA = false;
-                        Toolbar.Instance.tip.text = "Door: Position?";
-                        EditorPad.Instance.tool.state.ForceReset();
                     }
+
+                    hasPosA = false;
+                    Toolbar.Instance.tip.text = "Door: Position?";
+                    EditorPad.Instance.tool.state.ForceReset();
                 };
         }
         public override void Exit()
         {
-            Toolbar.Tool_Painter.clickMode = false;
             Toolbar.Instance.tip.text = string.Empty;
             EditorPad.Instance.tool.subscribe = null;
         }
@@ -241,7 +244,8 @@ public class Categories : Singleton<Categories>
             {
                 if (backup == null)
                 {
-                    backup = EditorPad.Instance.ec.CreateDoor(coordinate, towards, selection).door;
+                    var build = EditorPad.Instance.ec.CreateDoor(coordinate, towards, selection);
+                    if (build) backup = build.door;
                 }
                 else
                 {
@@ -289,36 +293,34 @@ public class Categories : Singleton<Categories>
     }
     public class Editor_BaldiMan : StateBase
     {
-        public override void Enter()
+        public override void Enter() => EditorPad.Instance.tool.subscribe = (a) => EditorPad.Instance.RecordStep(new HistoryAction_Baldi(a));
+        public override void Exit() => EditorPad.Instance.tool.subscribe = null;
+        public class HistoryAction_Baldi : HistoryAction
         {
-            Toolbar.Tool_Painter.clickMode = true;
-            EditorPad.Instance.tool.subscribe = (a) =>
-               {
-                   if (SpriteSelector.Instance.selectionIndex > 1)
-                   {
-                       int i = SpriteSelector.Instance.selectionIndex - 2;
-                       if (EditorPad.Instance.removal)
-                       {
-                           foreach (var b in a)
-                           {
-                               BaldiManager.Instance.RemoveEntityFromSpawn(i, b);
-                           }
-                       }
-                       else
-                       {
-                           foreach (var b in a)
-                           {
-                               Debug.Log("abc");
-                               BaldiManager.Instance.AddEntityToSpawn(i, b);
-                           }
-                       }
-                   }
-               };
-        }
-        public override void Exit()
-        {
-            Toolbar.Tool_Painter.clickMode = false;
-            EditorPad.Instance.tool.subscribe = null;
+            int i;
+            Coordinate[] array;
+            public HistoryAction_Baldi(Coordinate[] coordinates)
+            {
+                i = SpriteSelector.Instance.selectionIndex;
+                invert = EditorPad.Instance.removal;
+                array = coordinates;
+            }
+
+            protected override void Negative()
+            {
+                foreach (var b in array)
+                {
+                    BaldiManager.Instance.RemoveSpawn(i, b);
+                }
+            }
+
+            protected override void Positive()
+            {
+                foreach (var b in array)
+                {
+                    BaldiManager.Instance.AddSpawn(i, b);
+                }
+            }
         }
     }
 }

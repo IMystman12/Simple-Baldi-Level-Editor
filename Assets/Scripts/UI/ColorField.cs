@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -21,7 +19,7 @@ public class ColorField : MonoBehaviour
         {
             if (int.TryParse(array[i], out val) && val < 256)
             {
-                result[i] = val / 255;
+                result[i] = val / 255f;
             }
             else
             {
@@ -35,6 +33,6 @@ public class ColorField : MonoBehaviour
     public void ShowColor()
     {
         colorField.text = string.Join(",", color.r * 255, color.g * 255, color.b * 255);
-        colorField.textComponent.color = color == Color.black ? Color.grey : color;
+        colorField.textComponent.color = (0.2126f * color.r + 0.7152f * color.g + 0.0722f * color.b) < 0.1f ? Color.grey : color;
     }
 }

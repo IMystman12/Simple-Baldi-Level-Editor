@@ -138,7 +138,7 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -157,4 +157,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spriteRenderer: {fileID: 791123754543363572}
+  mc: {fileID: 6767966063791925889}
+  balObject:
+    type: 0
+    position: {x: 0, y: 0}
+    rotation: 0
   circleCollider: {fileID: 7520964786741577478}

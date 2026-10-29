@@ -7,27 +7,33 @@ using UnityEngine;
 
 public class BaldiManager : Singleton<BaldiManager>
 {
-    [SerializeField] private List<EntityInstance> entityPref = new List<EntityInstance>(), entities = new List<EntityInstance>();
-    [SerializeField] private List<EntitySpawn> entitySpawns = new List<EntitySpawn>();
-
-    [SerializeField] private TMP_Text hud, stated;
-    [SerializeField] private float playerTimeScale = 1, npcTimeScale = 1;
-
-    public int foundNotebooks, foundExits;
+    [Header("Pref")]
     [SerializeField] private Notebook notebookPref;
-    [SerializeField] private List<Notebook> notebooks = new List<Notebook>();
     [SerializeField] private Entrance entrancePref;
-    [SerializeField] private List<Entrance> exits = new List<Entrance>();
+    [SerializeField] private Player playerPref;
+    [SerializeField] private NPC nPCPref;
 
-    [SerializeField] private bool paused;
-    IEnumerator entityLife, playGame;
-
+    [Header("Spawn")]
     [SerializeField] private GameObject editorProperties;
+    public List<EntityInstance> entities = new List<EntityInstance>();
+    [SerializeField] private List<Notebook> notebooks = new List<Notebook>();
+    [SerializeField] private List<Entrance> entrances = new List<Entrance>();
+
+    [Header("Game")]
+    IEnumerator entityLife, playGame;
+    [SerializeField] private TMP_Text hud, stated;
+    [SerializeField] private bool paused;
+    [SerializeField] public float playerTimeScale = 1, npcTimeScale = 1;
+    public int foundNotebooks, foundExits;
     [SerializeField] private Sprite exitActivated, exitInactivated;
+    public Player mainPlayer;
+
     public void Play()
     {
         EditorPad.Instance.Pause(true);
         editorProperties.SetActive(false);
+
+        EditorPad.Instance.ec.UpdateColliders();
 
         if (playGame != null)
         {
@@ -47,8 +53,7 @@ public class BaldiManager : Singleton<BaldiManager>
     void ResetAll()
     {
         stated.text = string.Empty;
-        playerTimeScale = 1;
-        npcTimeScale = 1;
+        Pause(false, false);
 
         foundNotebooks = 0;
         foundExits = 0;
@@ -56,10 +61,15 @@ public class BaldiManager : Singleton<BaldiManager>
         {
             a.ResetState();
         }
-        foreach (var e in exits)
+        foreach (var a in entities)
         {
-            e.spriteRenderer.color = Color.white;
+            a.UpdateFromData();
+        }
+        foreach (var e in entrances)
+        {
+            e.SetColor(Color.white);
             e.spriteRenderer.sprite = exitActivated;
+            e.ResetState();
         }
     }
 
@@ -67,21 +77,30 @@ public class BaldiManager : Singleton<BaldiManager>
     {
         ResetAll();
         stated.text = string.Empty;
-        Stopwatch sw = Stopwatch.StartNew();
-
-        int ce = exits.Count - 1, cn = notebooks.Count - 1;
-        while ((cn > foundNotebooks) || (ce > foundExits))
+        for (int i = 0; i < entities.Count; i++)
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                Pause();
-            }
-            yield return null;
+            mainPlayer = entities[i].GetComponent<Player>();
+            if (mainPlayer) break;
         }
+        if (mainPlayer)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
-        stated.color = Color.green;
-        stated.text = $"Congratulations!\nYou won the game within {sw.ElapsedMilliseconds} ms!";
-        yield return new WaitForSecondsRealtime(5);
+            UpdateHudText();
+            while ((notebooks.Count > foundNotebooks) || (entrances.Count > foundExits))
+            {
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    Pause(!paused, true);
+                }
+                yield return null;
+            }
+
+            Pause(true, false);
+            stated.color = Color.green;
+            stated.text = $"Congratulations!\nYou won the game within {sw.ElapsedMilliseconds} ms!";
+            yield return new WaitForSecondsRealtime(5);
+        }
         ResetAll();
         QuitGame();
     }
@@ -95,6 +114,7 @@ public class BaldiManager : Singleton<BaldiManager>
         {
             StopCoroutine(entityLife);
         }
+        Pause(true, false);
         stated.color = Color.red;
         stated.text = $"G@M3 0V3R111";
         yield return new WaitForSecondsRealtime(5);
@@ -104,25 +124,40 @@ public class BaldiManager : Singleton<BaldiManager>
     public void GetNotebook()
     {
         foundNotebooks++;
-        int ce = exits.Count - 1, cn = notebooks.Count - 1;
-        if (cn > foundNotebooks)
+        if (notebooks.Count >= foundNotebooks)
         {
-            hud.text = $"Notebooks: {foundNotebooks}/{cn}";
+            foreach (var e in entrances)
+            {
+                e.SetColor(Color.green);
+            }
+        }
+        UpdateHudText();
+    }
+    public bool GetEntrance(Entrance entrance)
+    {
+        if (notebooks.Count <= foundNotebooks)
+        {
+            if ((entrances.Count - 1) > foundExits)
+            {
+                entrance.SetColor(Color.red);
+                entrance.spriteRenderer.sprite = exitInactivated;
+            }
+            foundExits++;
+            UpdateHudText();
+            return true;
+        }
+        return false;
+    }
+    void UpdateHudText()
+    {
+        if (notebooks.Count > foundNotebooks)
+        {
+            hud.text = $"Notebooks: {foundNotebooks}/{notebooks.Count}";
         }
         else
         {
-            hud.text = $"Exits: {foundExits}/{ce}";
-            foreach (var e in exits)
-            {
-                e.spriteRenderer.color = Color.green;
-            }
+            hud.text = $"Exits: {foundExits}/{entrances.Count}";
         }
-    }
-    public void GetEntrance(Entrance entrance)
-    {
-        entrance.spriteRenderer.color = Color.red;
-        entrance.spriteRenderer.sprite = exitInactivated;
-        hud.text = $"Exits: {foundExits}/{exits.Count - 1}";
     }
 
 
@@ -136,20 +171,26 @@ public class BaldiManager : Singleton<BaldiManager>
         }
     }
 
-    public void Pause()
+    public void Pause(bool val, bool text)
     {
-        paused = !paused;
-        stated.color = Color.red;
-        stated.text = paused ? $"Paused!" : string.Empty;
+        paused = val;
+        if (text)
+        {
+            stated.color = Color.red;
+            stated.text = paused ? $"Paused!" : string.Empty;
+        }
         if (paused)
         {
             _pts = playerTimeScale;
             _nts = npcTimeScale;
+            _hs = hud.text;
         }
         playerTimeScale = paused ? 0 : _pts;
         npcTimeScale = paused ? 0 : _nts;
+        hud.text = paused ? string.Empty : _hs;
     }
-    float _pts, _nts;
+    string _hs;
+    float _pts = 1, _nts = 1;
 
     public void QuitGame()
     {
@@ -162,31 +203,95 @@ public class BaldiManager : Singleton<BaldiManager>
         stated.text = string.Empty;
     }
 
+    public void AddSpawn(int index, Coordinate coordinate) => LoadObject(new BalObject() { type = index, position = Coordinate.ConvertToMapCoordinate(coordinate) });
 
-    public void AddEntityToSpawn(int index, Coordinate coordinate) => entitySpawns.Add(new EntitySpawn()
+    public BalPosable LoadObject(BalObject balObject)
     {
-        index = index,
-        position = coordinate,
-        prev = Instantiate(entityPref[index], Coordinate.ConvertToMapCoordinate(coordinate), Quaternion.identity, transform)
-    });
-    public void RemoveEntityFromSpawn(int index, Coordinate coordinate)
-    {
-        EntitySpawn e;
-        for (int i = 0; i < entitySpawns.Count; i++)
+        EditorPad.Instance.ec.balObjects.Add(balObject);
+        BalPosable result;
+        switch (balObject.type)
         {
-            if (entitySpawns[i].index == index && entitySpawns[i].position == coordinate)
-            {
-                e = entitySpawns[i];
-                Destroy(e.prev.gameObject);
-                entitySpawns.RemoveAt(i);
-            }
+            case 0:
+                notebooks.Add(Instantiate(notebookPref, EditorPad.Instance.ec.transform));
+                result = notebooks[notebooks.Count - 1];
+                break;
+            case 1:
+                entrances.Add(Instantiate(entrancePref, EditorPad.Instance.ec.transform));
+                result = entrances[entrances.Count - 1];
+                break;
+            case 2:
+                entities.Add(Instantiate(playerPref, EditorPad.Instance.ec.transform));
+                result = entities[entities.Count - 1];
+                break;
+            default:
+                NPC n = Instantiate(nPCPref, EditorPad.Instance.ec.transform);
+                n.Initialize((NPCType)(balObject.type - 3));
+                entities.Add(n);
+                result = entities[entities.Count - 1];
+                break;
         }
+        result.balObject = balObject;
+        result.UpdateFromData();
+        return result;
     }
-    [Serializable]
-    public struct EntitySpawn
+
+    public void RemoveSpawn(int index, Coordinate coordinate)
     {
-        public int index;
-        public Coordinate position;
-        public EntityInstance prev;
+        Transform tf;
+        switch (index)
+        {
+            case 0:
+                for (int i = 0; i < notebooks.Count; i++)
+                {
+                    tf = notebooks[i].transform;
+                    if (Coordinate.ConvertToGridCoordinate(tf.position) == coordinate)
+                    {
+                        EditorPad.Instance.ec.balObjects.Remove(notebooks[i].balObject);
+                        notebooks.RemoveAt(i);
+                        i--;
+                        Destroy(tf.gameObject);
+                    }
+                }
+                break;
+            case 1:
+                for (int i = 0; i < entrances.Count; i++)
+                {
+                    tf = entrances[i].transform;
+                    if (Coordinate.ConvertToGridCoordinate(tf.position) == coordinate)
+                    {
+                        EditorPad.Instance.ec.balObjects.Remove(entrances[i].balObject);
+                        entrances.RemoveAt(i);
+                        i--;
+                        Destroy(tf.gameObject);
+                    }
+                }
+                break;
+            case 2:
+                for (int i = 0; i < entities.Count; i++)
+                {
+                    tf = entities[i].transform;
+                    if (Coordinate.ConvertToGridCoordinate(tf.position) == coordinate && tf.GetComponent<Player>())
+                    {
+                        EditorPad.Instance.ec.balObjects.Remove(entities[i].balObject);
+                        entities.RemoveAt(i);
+                        i--;
+                        Destroy(tf.gameObject);
+                    }
+                }
+                break;
+            case 3:
+                for (int i = 0; i < entities.Count; i++)
+                {
+                    tf = entities[i].transform;
+                    if (Coordinate.ConvertToGridCoordinate(tf.position) == coordinate && tf.GetComponent<NPC>())
+                    {
+                        EditorPad.Instance.ec.balObjects.Remove(entities[i].balObject);
+                        entities.RemoveAt(i);
+                        i--;
+                        Destroy(tf.gameObject);
+                    }
+                }
+                break;
+        }
     }
 }
