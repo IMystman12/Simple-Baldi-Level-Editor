@@ -24,9 +24,9 @@ public class InputManager : Singleton<InputManager>
     static Vector3 _pointPosition;
 
     //Control
-    public float Zoom => Priority(ReachOrNone(Input.GetAxis("Mouse ScrollWheel"), 0.1f), zoomMobile * 0.05f) * Time.fixedDeltaTime;
-    public float MovementX => Priority(Input.GetAxis("Horizontal"), movementXMobile) * Time.fixedDeltaTime;
-    public float MovementY => Priority(Input.GetAxis("Vertical"), movementYMobile) * Time.fixedDeltaTime;
+    public float Zoom => Priority(Input.GetAxis("Zoom"), zoomMobile) * Time.unscaledDeltaTime * 0.5f;
+    public float MovementX => Priority(Input.GetAxis("Horizontal"), movementXMobile) * Time.unscaledDeltaTime * 0.5f;
+    public float MovementY => Priority(Input.GetAxis("Vertical"), movementYMobile) * Time.unscaledDeltaTime * 0.5f;
 
     Camera cam;
     private void Awake()
@@ -66,13 +66,5 @@ public class InputManager : Singleton<InputManager>
         }
     }
     float Priority(float a, float b) => Mathf.Abs(b) > Mathf.Abs(a) ? b : a;
-    float ReachOrNone(float a, float target)
-    {
-        if (Mathf.Abs(a) >= target)
-        {
-            return Mathf.Sign(a);
-        }
-        return 0;
-    }
     public void SetMobileControl(bool val) => controls.SetActive(val && Input.touchSupported);
 }
